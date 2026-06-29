@@ -86,19 +86,21 @@
 \fboxsep1pt
 
 \parbox[t]{0.7\hsize}{
-  {\Huge\bf OPA documentation} version {\bf 4.2.4}\\
+  {\Huge\bf OPA documentation} version {\bf 4.3.0}\\
   Andreas Streun, \today
 } \hfill  \includegraphics{opalogo_small.jpg}
 \rule{\hsize}{1pt}
 
 \section{How to use this document}
 This document is intended to support program developers, who want to maintain the existing OPA code, or to rewrite it in another environment, or to extract useful parts for integration into other codes.
-
 When reading this document, the source code may be examined in parallel, preferably in the Lazarus IDE. In order to see how the code works, OPA may be executed or the tutorial \cite{tutorial} may be consulted. Further information on using OPA is found in the user guide \cite{userguide} and the underlying physics is outlined in \cite{inside}.
 
-In this document following styles are used:\\
-Pieces of code are shown in \code{typewriter style}.
-\opagui{GUI} is a graphical user interface, usually based on class \code{TForm}. \opaguif{Frame} if a user-defined GUI-component, usually based on class \code{TFrame}.  \opauni{Unit} is a standard Pascal unit.  
+In this document following styles are used: 
+Pieces of code are shown in \code{typewriter style}. \opagui{GUI} is a graphical user interface,  \opaguif{Frame} is a frame and \opauni{Unit} is a standard Pascal unit.  
+
+Lazarus knows different kinds of units: A \opauni{standard Pascal unit} usually is a \code{.pas} file containing a library of functions and procedures to be called from one or more GUIs. 
+A \opagui{Graphical User Interface} is a form containing buttons, edit fields etc. It is a \code{.pas} file accompanied by a \code{.lfm} file defining the layout. A \opagui{GUI} declares a class and is the only instance of this class. Usually it is based on class \code{TForm}.
+The third kind, called \opaguif{Frame} is a user-defined GUI-component, usually based on class \code{TFrame}. Basically it is a macro for GUI components, like a small GUI on its own, which is added like any other component to a parent GUI. So a frame defines a class but not an instance. The parent GUI then will declare instances of this frame.
 
 A GUI or a frame has a list of \guico{actions} corresponding to the event handlers of its components, for example a button to be pressed. The pure Pascal units are passive, they contain a set of public \unico{procedures} which are called from the GUIs. Frames too may contain public \guifco{procedures}. Thus in this documentation, action lists are given for the GUIs and frames, and lists of public procedures for the frames and units. All modules may offer public variables, here coloured \guico{x}, \guifco{y}, \unico{z} for GUIs, frames, units.
 
@@ -116,17 +118,18 @@ Questions may be adressed to the author at \url{mailto:psi@andreas-streun.de}.
 
 Following semantic versioning \cite{semver} version 4.063 of OPA was renamed 4.1.0. However, since up to now only the author worked on the code, the distinctions MAJOR, MINOR, PATCH rather refer to the changes as visible to the users than to the API. 
 
+In version 4.3.0 OPA includes 48 Pascal units \code{.pas}, 29 of them are \opagui{GUIs} which are accompanied by a Lazarus form \code{.lfm} (created by the Lazarus IDE), and 19 of them are Pascal \opauni{units}. Four of the GUIs are \opaguif{frames}, i.e. self-defined components embedded in other GUIs.
+Table~\ref{tabover} lists the units. The column "Size" lists the lines of code as a rough estimate for the complexity of the unit. Furthermore, OPA includes the main program file \ouni{{opa.lpr}} and 10 image files \code{.ico, .bmp} to draw symbols on buttons. 
 
-In version 4.2.4 OPA includes 44 Pascal units \code{.pas}, 29 of them are \opagui{GUIs} which are accompanied by a Lazarus form \code{.lfm} (created by the Lazarus IDE), and 15 of them are Pascal \opauni{units}. Four of the GUIs are \opaguif{frames}, i.e. self-defined components embedded in other GUIs. Four units are located in a parallel folder, here called \code{../com/} since they are not OPA specific but used with other programs too.
-Table~\ref{tabover} lists the units. The column "Size" lists the lines of code as a rough estimate for the complexity of the unit. Furthermore, OPA includes the main program file \ouni{{opa.lpr}} and a couple of image files \code{.ico, .bmp} to draw symbols on buttons. 
+A GUI defines a class, given in table~\ref{tabover} in the column "class". The actual GUI is the one and only instance of this class, i.e. a public variable, usually with the name as the class but without the leading "T". A frame also defines a class but no instance.
+%, instead the parent GUI will define one or more instances of this class as variables. 
+A standard Pascal unit may also define a class to be instantiated, or it is a library, i.e. a collection of variables and public procedures.
 
-A GUI defines a class, given in table~\ref{tabover} in the column "class". The actual GUI is the one and only instance of this class, i.e. a public variable, usually with the name as the class but without the leading "T". A frame also defines a class but no instance, instead the parent GUI will define one or more instances of this class as variables. A standard Pascal unit may also define a class to be instantiated, or it is a library, i.e. a collection of variables and public procedures.
+In general GUIs should handle the user interactions only while the Pascal units do all the calculations. This separation was largely realized after major refactoring leading to version 4.3.0, see protocol \code{changelog.md} for details.
 
-In general GUIs should handle the user interactions only while the Pascal units do all the calculations. This separation was largely realized in OPA, however not strictly. Some minor calculations are done in the GUI in some places.
-
-In version 4.2.0 all files were renamed following this convention for the file name: 
+In version 4.2.0 all files had been renamed following this convention for the file name: 
 \code{opa*} is a first level GUI, i.e. one of the main design programs launched from the main menu. \code{*lib} is a plain Pascal units which contains a library of physics procedures. 
-\code{o*} is a second level GUI, which is launched by a first level GUI, for example a start menu. \code{*frame} is a frame. Files in the \code{../com} folder were not renamed. 
+\code{o*} is a second level GUI, which is launched by a first level GUI, for example a start menu. \code{*frame} is a frame. \code{com*} are a couple of files which are not OPA-specific and may be used with other codes as well. 
 
 Figure~\ref{blockfig} shows a block diagram of the GUIs. \\
 
@@ -135,35 +138,37 @@ after section \ref{seclatdata} on organization of lattice data,
 section \ref{secglob} will explain the "backbone" of OPA, which are global data and procedures, the main menu and units for mathematics and graphics which are used by many GUIs. 
 Section \ref{secedit} contains lattice file handling and the two editors, text-based and "LEGO" block like, and a special editor for longitudinal gradient bends.
 
-Beam physics starts with section \ref{seclino} on the interactive linear optics design panel and related GUIs and units and continues with section~\ref{secmomo} on off-momentum optics and bucket viewer. The non-linear optimization module is explained in section~\ref{secnonl}, and section~\ref{secorin} covers injection and orbit correction.
+Beam physics starts with section \ref{seclino} on the interactive linear optics design panel and related GUIs and units and continues with section~\ref{secmomo} on off-momentum optics and bucket viewer. The non-linear optimization module is explained in section~\ref{secnonl}, and section~\ref{secorin} covers injection, orbit correction and machine layout.
 
-The three tracking modules with their library are explained in section \ref{sectrac}. Finally, machine layout and magnet currents are in section~\ref{secelse}.
-
-
+The three tracking modules with their library are explained in section \ref{sectrac}. Finally, magnet currents and a unit for code testing are in section~\ref{secelse}.
 
 
 
 
-\begin{table}
+
+
+\begin{table}[p]
 \caption{OPA units overview}
 \label{tabover}
-{\small
+{\fontsize{12pt}{13pt}\selectfont
 \begin{tabular}{llcllr}
 Sec & Name & SC & class & Purpose & Size \\ \hline
-\tabouni{globlib} & \unico{GL} & & global variables and procedures & 2880 \\
 \tabogui{opamenu} & &\guico{TMenuForm} & the main menu & 903 \\
-\tabouni{mathlib} & \unico{ML} & & mathematical library & 2075 \\
-\tabouni{../com/vgraph} & \unico{VG} & \unico{Vplot} & real number graphics library & 1277 \\
-\taboguif{../com/asfigure} & \guifco{AF} & \guifco{TFigure} & general plot procedure & 315 \\
-\tabouni{../com/conrect} & \unico{CO} & & contour plot calculation & 332 \\
-\tabouni{../com/asaux} & \unico{AX} & & little helpers & 349 \\
+\tabouni{globlib} & \unico{GL} & & global variables and procedures & 1477 \\
+\tabouni{mathlib} & \unico{ML} & & mathematical library & 2117 \\
+\tabouni{comvgraphlib} & \unico{VG} & \unico{Vplot} & real number graphics library & 1277 \\
+\taboguif{comfigureframe} & \guifco{FF} & \guifco{TFigure} & general plot procedure & 315 \\
+\tabouni{comcontourlib} & \unico{CO} & & contour plot calculation & 332 \\
+\tabouni{comauxlib} & \unico{AX} & & little helpers & 349 \\
 \hline
-\tabouni{latfilelib} & \unico{LF} & & file reading and writing & 1776 \\
+\tabouni{latfilelib} & \unico{LA} & & file reading and writing & 1774 \\
 \tabogui{opatexteditor} & & \guico{TFormTxtEdt} & text editor for lattice file & 190 \\
-\tabogui{opaeditor} & & \guico{TFormEdit} & interactive lattice editor  & 346 \\
+\tabogui{opaeditor} & & \guico{TFormEdit} & interactive lattice editor  & 231 \\
 \tabogui{oelecreate} & & \guico{TEditElemCreate} & creation of an element & 144 \\
 \tabogui{oeleedit} & & \guico{TEditElemSet} & edit element parameters & 861 \\
 \tabogui{osegedit} & & \guico{TEditSegSet} & edit segment parameters & 451 \\
+\tabouni{varlib} & \unico{VL} & & arithmetic evaluator & 288 \\
+\tabouni{editorlib} & \unico{ED} & & element and segment handling & 835 \\
 \tabogui{opalgbedit} & & \guico{} & longitudinal gradient bend editor & 702 \\
 \tabouni{lgbeditlib} & \unico{LG} & & longitudinal gradient bend calculations & 471 \\
 \hline
@@ -173,8 +178,8 @@ Sec & Name & SC & class & Purpose & Size \\ \hline
 \tabogui{obetenvmag} & & \guico{TsetEnvel} & setting for optical functions plot & 372 \\
 \tabogui{otunematrix} & & \guico{TtuneMatrix} & adjustment of lattice tune & 251 \\
 \tabogui{owriteomrk} & & \guico{TWOMK} & write optics markers & 125 \\
-\tabouni{linoplib} & \unico{LO} & & linear beam dynamics calculations & 2766 \\
-\tabouni{elemlib} & \unico{EL} & & element propagation calculations & 2363 \\
+\tabouni{linoplib} & \unico{LO} & & linear beam dynamics calculations & 2781 \\
+\tabouni{elemlib} & \unico{EL} & & element propagation calculations & 2384 \\
 \tabogui{omatching} & & \guico{TMatch} & linear optics matching & 1461 \\
 \tabogui{omatchscan} & & \guico{TsetMatchScan}& parameter scan & 119 \\
 \tabogui{opatunediag} & & \guico{TTunePlot} & show the tune diagram & 634 \\
@@ -184,22 +189,23 @@ Sec & Name & SC & class & Purpose & Size \\ \hline
 \tabogui{opabucket} & & \guico{TBucketView} & plot RF bucket & 632 \\
 \hline
 \tabogui{opachroma} & & \guico{TChroma} & nonlinear optimization & 1329 \\
-\taboguif{csexframe} & \guifco{SF} & \guico{TCSex} & controller for nonlinear element & 427 \\
-\taboguif{chamframe} & \guifco{HF} & \guico{TCHam} & bar indicator for Hamiltonian mode & 420 \\
+\taboguif{csexframe} & \guifco{SF} & \guifco{TCSex} & controller for nonlinear element & 427 \\
+\taboguif{chamframe} & \guifco{HF} & \guifco{TCHam} & bar indicator for Hamiltonian mode & 420 \\
 \tabouni{chromreslib} & \unico{CR} & & little helper to pass results handles & 79 \\
 \tabouni{chromelelib} & \unico{CE} & & little helper to pass element handles & 93 \\
 \tabogui{ochromsvector} & & \guico{TSVectorPlot} & show Hamiltonian as complex vector & 145 \\
 \tabouni{chromlib} & \unico{CH} & & nonlinear dynamics calculations & 1813 \\
 \hline
-\tabogui{opaorbit} & & \guico{TOrbit} & orbit correction and injection & 2254 \\
+\tabogui{opaorbit} & & \guico{TOrbit} & orbit correction and injection & 1507 \\
+\tabogui{opageometry} & & \guico{TGeometry} & geometric machine layout and matching & 882 \\
+\tabouni{georblib} & \unico{GO} & & orbit, injection and geometry calc.& 2250 \\
 \hline
 \tabogui{opatrackps} & & \guico{TtrackP} & phase space tracking & 1422 \\
 \tabogui{opatrackda} & & \guico{TtrackDA} & dynamic aperture tracking & 1666 \\
 \tabogui{opatracktt} & & \guico{TtrackT} & Touschek tracking & 1660 \\
 \tabouni{tracklib} & \unico{TL} & & particle tracking calculations & 1502 \\
 \hline
-\tabogui{opageometry} & & \guico{TGeometry} & geometric machine layout and matching & 2011 \\
-\tabogui{opacurrents} & & \guico{TCurrents} & magnet currents to machine control & 303 \\
+\tabogui{opacurrents} & & \guico{TCurrents} & magnet currents to machine control & 414 \\
 \tabouni{testcode} & \unico{TC} & & test of new features & 472 
 \end{tabular}
 }
@@ -221,16 +227,18 @@ This section will give an overview of the data types and variables used globally
 Like other beam dynamics programs OPA works on a lattice file. It contains {\em elements}, mainly magnets of different type, and {\em segments}, which are line-ups of elements and segments. One of the segments is selected and expanded to become {\em the lattice} to work with. Element parameters, e.g. quadrupole strength in the lattice file can be numbers or arithmetic expressions using {\em variables}, which are part of the lattice file too.
 
 \subsection{Variables}
-Type \unico{Variable\_type} is a record containing a name, a value and a string representing an arithmetic expression, and \unico{Variable} is an array of these. If the string is \code{nil} the variable is just a value, otherwise the value is given by evaluation of the expression at runtime. The expression may contain numbers, other variables, basic operators ({\tt +-*/}) and an arbitrary number of bracket pairs. The variable name has to start with a character, then numbers and characters may follow. Syntax check is performed. Example: {\tt A = 0.5; XB3S = (1.0-A)/2;}
+A variable contains a value and, optionally, a string representing an arithmetic expression. If the string is \code{nil} the variable is just a value, otherwise the value is given by evaluation of the expression at runtime. The expression may contain numbers, other variables, basic operators ({\tt +-*/}) and an arbitrary number of bracket pairs. The variable name has to start with a character, then numbers and characters may follow. Syntax check is performed. Example: {\tt A = 0.5; XB3S = (1.0-A)/2;}
 
 Variables may be referenced by elements. Two more fields in the variable record control if the variable is used by an element or connected to a knob in design.
 
 \subsection{Elements}
-Type \unico{ElementType} is a case-record for defining element parameters, and type \unico{ElemArr} is an array of these. The global variables \unico{Elem} and \unico{Ella} are of type \unico{ElemArr} and store all elements, resp. the subset of elements currently used in the active lattice. The elements in \unico{Elem} are read from the lattice file and manipulated in the editors, while the elements in \unico{Ella} are modified in the various GUIs. After terminating a design calculation the user is asked to save or cancel the changes, which causes the \unico{Ella}-data to be copied back to the \unico{Elem} array or not.
+All elements have length, aperture and a rotation angle (roll) and a type. 
+Furthermore a pointer may give a list of real names for machine control (optionally used for geometry data output, \ogui{opageometry} and exporting power supply currents, \ogui{opacurrents}). 
 
-All elements have length, aperture and a rotation angle (roll) and a type. Furthermore a pointer may give a list of real names for machine control (optionally used for geometry data output, \ogui{opageometry} and exporting power supply currents, \ogui{opacurrents}). 
 
-Depending on type different parameters are defined in tables \ref{tabel2} and \ref{tabel1}. Columns "in file" and "in record" refer to the keywords to be set in the lattice text file and the corresponding field in the \unico{ElementType} record. An asterisk after a field name like \unico{l*} indicates, that an arithmetic expression is allowed too, which refers to a field of same name with suffix \code{\_exp}, in this case \unico{l\_exp}. It contains a pointer to a string with the expression making use of variables (see unit \ouni{globlib} code for details). 
+
+
+Depending on type different parameters are defined in tables \ref{tabel2} and \ref{tabel1}. Columns "in file" and "in record" refer to the keywords to be set in the lattice text file and the corresponding field in the element record (see \unico{globlib}). An asterisk after a field name like \unico{l*} indicates, that an arithmetic expression is allowed too.
 The column "unit" refers to the physical unit to be given in the file. Internally all values are SI-units. % \todo{CORRECT???}. 
 The column "note" refers to these comments:
 
@@ -379,53 +387,38 @@ s) Presently photon beam is only used for plotting x-ray beams in the geometry l
 t) Simple marker and beam rotation don't have additional parameters.\\
 
 
-\label{namelist}Furthermore, not listed in the table, the element record contains a field \unico{nl} of type \unico{NameListType} which is a linked containing real element names, power supply names and information on polarity and family topology. These data are defined in additional files defined by the keywords {\tt ALLOCATION} and {\tt CALIBRATION} in the lattice file. Unit \ouni{latfilelib}, reads and assigns these data. Unit \ogui{opacurrents} exports these data including calculated currents and more to the control system, and unit \ogui{opageometry} exports list of real names and geo data.
+\label{namelist}Furthermore, not listed in the table, an element [family] definition may be connected to a list of [individual] control system names, power supply names and information on polarity and family topology. These data are defined in additional files defined by the keywords {\tt ALLOCATION} and {\tt CALIBRATION} in the lattice file. Unit \ouni{latfilelib}, reads and assigns these data. Unit \ogui{opacurrents} exports these data including calculated currents and more to the control system, and unit \ogui{opageometry} exports list of real names and geo data.
 
-However, for correctors (dipoles and monitors, skew and regular quads) with reserved names in the lattice file, the namelist is used to generate individual corrector names in the \unico{Ella} array of used elements to adress them in orbit correction, unit \ogui{opaorbit}.
+However, for correctors (dipoles and monitors, skew and regular quads) with reserved names in the lattice file, the name list is used to generate individual corrector names to adress them in orbit correction, unit \ogui{opaorbit}.
 
 
-
-\subsection{Segments}
-A segment is a mixed line-up of elements and segments referenced by name. Segments are unpacked recursively to build the lattice. Type \unico{Segment\_type} is a record containing a name and two pointers to the first and last entry. These pointers are of type \unico{AbstractElement\_type}, which contains the name of the element or segment, the kind, i.e. if it is an element {\em or} a segment, a flag to tell if the entry is inverted, a number how often to repeat the entry, and two pointers to the previous and next element. \unico{Segm} is an array of \unico{Segment\_type}. 
-
-\subsection{Lattice and girders}
-\unico{Lattice} is an array of \unico{LatticeType} records containing the name and index of the element, the direction how it is installed , the (optional) index of the {\em girder} it sits on, and five real numbers for misalignment and attenuation factors. Two boolean flags tell if the element is coupling and if misalignments were set to speed up calculations later. 
-
+\subsection{Segments and Lattice}
+A segment is a mixed line-up of elements and segments referenced by name. Segments are unpacked recursively to build the lattice. The lattice is a series of element names with additional information how the elements are installed: most important is the orientation of the elements. 
 \feature{Unlike several other codes OPA handles correctly nested inversions of segments to obtain the correct orientation of the element in the lattice. This is relevant for bending magnets with unequal edge properties.}
 
-Using girders is optional and not required for optics design. Girders are used in orbit correction, \ogui{opaorbit}, and also shown in the geometry plot, \ogui{opageometry}. \unico{Girder} is an array of \unico{GirderType} records. It contains position and orientation of the girder, the misalignments of its feet, the index in the lattice array where it starts and ends, and an information how it is connected to the adjacent girders. 
+Additional information contains allocation of elements on girders and misaligments. Using girders is optional and not required for optics design. Girders are used in orbit correction, \ogui{opaorbit}, and also shown in the geometry plot, \ogui{opageometry}.
+
+
 
 \subsection{Global parameters, status flags and intermediate results}
-Variable \unico{Glob} of type \unico{GlobType} contains parameters which are used by most units, like the beam energy, the sizes of lattice and element arrays, the optics parameters at the begin and end of the current lattice and more. 
+There is a couple of global variables used by many units, for example the beam energy or the size of the lattice.
 
-Variable \unico{Beam} of type \unico{BeamParType} contains calculated beam parameters like emittances, tunes etc. However, units making use of beam parameters usually recalculate the lattice at start to make sure that the parameter settings are correct and consistent.
+Status flags keep track of the calculation progress, e.g. if the lattice has been built already, or if special lattice features are present, e.g. if there are active kickers. Depending on the status the different GUIs are enabled, for example non-linear optimization is only possible if a periodic solution exists. 
 
-Variable \unico{Status} of type \unico{StatusType} contains boolean flags to keep track of the calculation progress, e.g. if the lattice has been built already, and special lattice features, e.g. if there are active kickers. Depending on the status the different GUIs are enabled, for example non-linear optimization is only possible if a periodic solution exists. Furthermore, the array \unico{StatusLabels} of type \code{TLabel} gives status information in the main menu \ogui{opamenu}. Several constants named \unico{Status\dots} control the appearance.
-
-Variable \unico{SnapSave} of type \unico{SnapSaveType} keeps intermediate results, corresponding to the dashed arrows in Fig.~\ref{blockfig}. Originally it was used at SLS to export data to an EPICS \code{.snap} file for machine control by \ogui{opacurrents}, but later is was extended for more  internal communication between the OPA GUIs. The record contains following data:
+Intermediate results are stored for internal communication between the OPA GUIs, see the dashed arrows in Fig.~\ref{blockfig}. These include
 \begin{itemize}
 \item tunes and chromaticities and two $2\times 2$ matrices for moving the working point using all quadrupoles as calculated by \ogui{otunematrix} and shifting the chromaticities using two sextupole families as calculated by \ogui{opachroma}.
 \item Analytical results for amplitude dependent tune shifts and chromaticities calculated by \ogui{opachroma} are used by \ogui{opamomentum} and \ogui{opatrackps} for comparison.
 \item Momentum compaction up to fifth order calculated by \ogui{opamomentum} is used by \ogui{opabucket} for RF bucket calculation.
 \item RF voltage up to fifth order and RF wavelength as entered into the \ogui{opabucket} GUI, and bunch length and momentum acceptance calculated from the RF bucket are used by \ogui{opatracktt} for Touschek lifetime calculation. 
 \end{itemize}
-Furthermore the record stores some data for synchrotron radiation source points which once were exported to an camera application in the SLS control system. On the other hand, dynamic aperture data calculated by \ogui{opatrackda} and to be used for fast Touschek tracking in \ogui{opatracktt} are not included in the global \unico{SnapSave} variable in \unico{globlib} but located as a couple of variables named \unico{Flo\dots} in \unico{tracklib}, which is used by these two tracking GUIs.
-
-\todo{The management of global parameters, status flags and intermediate results developed through history and should be re-organized in a more systematic way. In particular, there are some flaws, so data are not always invalidated, if something affecting them was modified in the lattice~-- here, the user has to know what he/she does\dots\ And \unico{globlib} contains a couple of 
-public variables of basic types, which better should not be public to avoid errors and confusion. Wherever possible they may become local, or they should be hidden behind set- and get-procedures.}
-
 
 \subsection{User settings}
 For convenience OPA writes and reads user settings to/from files. 
 
 In the OPA program folder, are two files, \code{opa4\_path.ini} and \code{opa4\_glob.ini} which contain a list of last used lattice files and global settings (presently only the level how much diagnostics output is sent to an optional terminal window). \todo{It's a bad solution to have these files in the OPA program folder, because OPA needs write permission to this folder. A better solution should be found.}
 
-In each working folder containing lattice files is a file \code{opa4\_set.ini}, which is read at start or when switching the working folder, and written on exit or leaving the working folder. If the \code{.ini} file does not exist it is created and filled with default values. Presently (version 4.2.2) 291 user settings are remembered, for example target values for matching or size of a GUI. 
-
-Arrays \unico{GlobDef} and \unico{Def} keep the user settings. They are of type \unico{DefaultType} which is a record containing a unique name for the setting and its value. The names of recently  used files are stored in string array \unico{LastUsedFiles}. All these arrays are in \ouni{globlib}.
-
-
-
+In each working folder containing lattice files is a file \code{opa4\_set.ini}, which is read at start or when switching the working folder, and written on exit or leaving the working folder. If the \code{.ini} file does not exist it is created and filled with default values. Presently (version 4.3.0) 291 user settings are remembered, for example target values for matching or size of a GUI. 
 
 
 
@@ -436,111 +429,11 @@ Arrays \unico{GlobDef} and \unico{Def} keep the user settings. They are of type 
 \desc{The main program file which allocates the units as described below and creates some of the forms. It is created more or less automatically by the Lazarus IDE.}
 
 
-\ounih{Global data}{globlib}
-
-\desc{
-This unit defines global constants, types and variables as described in section~\ref{seclatdata} and thus is OPA's "database". It is also initialized first when OPA starts and sets environment variables and default values. Public variables defined here are used by the other modules, since almost all of them use \ouni{globlib}. This unit also provides many public procedures for various non-physics tasks. 
-
-Only a brief overview will be given here, because \todo{the \ouni{globlib} unit grew large and heterogenous over the years and should be split into several units for the different functions to be performed, for example: 1.~the "database", 2.~initialization and user settings, 3.~procedures for handling the lattice data, 4.~arithmetic evaluator, 5.~"little helpers", etc. Several procedures may be moved to other units, where they are used actually.} A complete documentation would naturally be established later during this disentangling process.
-}
-
-\uses{\opauni{../com/mathlib}, \opauni{../com/asaux}}
-
-\pvar{
-Constants include general settings, array sizes, color definitions, name strings and values of flags later to be referenced by name.
-
-Most important types and arrays are listed in section \ref{seclatdata}. 
-Furthermore, following types are defined:
-
-\unico{OmarkType} is a set of optics data as property of the element type "optics marker".
-
-\unico{OpValType} is an extended set of optics data used for propagation in \ouni{elemlib}.
-
-\unico{CurveType} is a point in an optical functions curve including a pointer to the next point.
-
-\unico{CurvePlotType} defines a curve by a pointer to its initial point.
-
-\unico{MainButtonHandles} provides global control of the various options in \ogui{opamenu} to enable or disable them based on the status flags.
-
-%\unico{ElementType} is a case-record for defining element parameters such as length, quad focusing strength, dipole bending angle etc. Several (but not all) parameters may be arithmetic expressions instead of numbers. For more details see the user guide \cite{userguide} or the source code. 
-%
-%\unico{variable\_type} is for variables defined by name and value or arithmetic expressions. Variables are referenced in arithmetic expressions of element parameters or in other variables.
-%
-%\unico{AbstractEleType} represents either an element or a segment and contains pointers to previous and next abstract elements. The abstract element may be inverted or repeated.
-%
-%\unico{SegmentType} is for segments, which are series of abstract elements, defined by pointers to its initial and final abstract element.
-%
-%\unico{LatticeType} is a lattice entry. The lattice is built by expanding a segment, so it contains only elements, and additional information on direction (if the element is inverted), and data relevant for orbit correction (misaligmnets and if the element sits on a girder). \\
-%
-%\unico{GirderType} describes a girder by first and last lattice entry of elements sitting on the girder, and by the type of connection to adjacent girders.
-%
-%\unico{DefaultType} defines a user setting by name and value. Default values are defined by \\ \prcod{globlib}{Initialization} but can be modified by the user and saved.
-%
-%Other types are mainly shortcut definitions to gather interrelated data.\\
-%
-%Here are the most important global variables. If not mentioned otherwise, the type name is the variable name with suffix \code{type}. Usually only one instance exists:
-%
-%\unico{Elem} and \unico{Ella} are arrays of \unico{Elementtype}, where the first one is read from file and manipulated in the editors, while the second one are a subset of elements used in the lattice and to be modified in the various calculations. After terminating a calculation the user is asked to save or cancel the changes, which causes the \unico{Ella}-data to be copied back to the \unico{Elem} array or not.
-%
-%\unico{Segm}, \unico{Lattice} and \unico{Girder} are arrays of corresponding types. Maximum array length is defined in the \code{const} section of the unit.
-%
-%\unico{Glob} saves some global parameters like beam energy, default aperture size etc.
-%
-%\unico{Status} is a group of status flags to be set by the outcome of calculations in order to enable or disable buttons and to re-use data in other calculations.
-%
-%
-%\unico{GlobDef} and \unico{Def} of \unico{DefaultType} are arrays of user-defined settings, which are read at start and when switching the working folder. 
-%
-%\unico{Beam} saves beam parameters like tune, emittance etc.
-%
-%\unico{SnapSave} stores intermediate results in order to re-use them in other modules
-}
-
-\ppro{
-
-\unico{Initialization} sets some global variables to reasonable initial values, sets all status flags to false, and sets default values for the user settings.
-Then it sets the OPA folder and tries to read the files \code{opa4\_path.ini} which contains a list of last used files, and \code{opa4\_glob\.ini} containing global user settings. Finally, it takes the folder from the first entry in the list of last used files to set the working folder and reads the local file \code{opa4\_set.ini} in this folder to restore the user settings. If these files are missing, the default values are used.
-
-\unico{GlobDefWriteFile} and \unico{DefWriteFile} write the user settings back to these files if the session is regularly terminated by \evcod{opamenu}{ExitOPA}.
-
-\unico{MakeLattice} builds the lattice from elements and segments. Since a segment itself contains elements and segments, the internal procedure \unico{SegLat} is called recursively to unpack the data. 
-%If a list of real names (from machine control system) is available, these names are 
-The elements, which are used in the lattice are copied from the \unico{Elem} to the \unico{Ella} array, and correctors and monitors with generic names \code{CH,CV,MON}
-are expanded into separate instances named \code{CH001,CH002...} to adress them individually in orbit correction in unit \ogui{opaorbit}. Finally status flags are set.
-
-\unico{GirderSetup} evaluates the girder structure if contained in the lattice and allocates the lattice elements to the corresponding girders.
-
-\unico{IniElem} sets default values for new elements.
-
-\unico{AppendAE, ClearSeg, NAESeg} are procedures to handle segments, which are series of pointers to elements or other segments.
-
-\unico{AppendCurve, ClearCurve}  prepare data sets for plotting curves of optical functions. 
-
-\unico{AppendChar} builds a linked list of characters for \ogui{opatexteditor} \todo{(wrong place)}.
-
-\unico{putkval, getkval, putSexkval, getSexkval} functions are shortcuts to set or get the parameter which is considered the strength of a magnet.
-
-\unico{FillComboSeg} fills the list of last used files in \ogui{opamenu}.
-
-\unico{OPALog} writes a message to the log window in \ogui{opamenu}.
-
-\unico{MainButtonEnable} enables or disables the options in \ogui{opamenu} depending on the status flags. For example, tracking is only enabled if a periodic solution exists.
-
-\unico{PassMainButtonHandles} and \unico{passErrLogHandle} take handles to the GUI components of \ogui{opamenu} to enable other units using \ouni{globlib} to enable/disable them.
-
-\unico{EllaSave} and \unico{Elcompare} check if elements in lattice (\unico{Ella}) have been changed with regard to the original elements (\unico{Elem}) and ask the user if the changes should be saved.
-
-The procedures and functions listed under "Calculator" are an arithmetic evaluator adapted from \cite{rosetta}. Other procedures not listed here include variable, element and segment to string conversion and other utilities which may be self-explanatory.
-}
-
-
-
-
 \oguih{Menu}{opamenu}
 
 \desc{The main GUI for reading and writing files and to launch the other GUIs. It includes message (log) and status windows. It is always open in the background. Closing it exits OPA.}
 
-\uses{\ouni{globlib}, \ogui{opaeditor}, \ogui{opatexteditor}, \ouni{latfilelib},\ \ogui{opalinop}, \ogui{opatunediag}, 
+\uses{\ouni{globlib}, \ogui{opaeditor}, \ogui{opatexteditor}, \ouni{editorlib}, \ouni{latfilelib},\ \ogui{opalinop}, \ogui{opatunediag}, 
   \ogui{opamomentum}, \ogui{opachroma}, \ogui{opatrackps},  \ogui{opatrackda}, \ogui{opatracktt}, \ogui{opaorbit},
   \ogui{opageometry}, \ogui{opalgbedit}, \ogui{opabucket}, \ogui{opacurrents}, \ouni{testcode}}
  
@@ -604,7 +497,7 @@ Note, that the initialization of \ouni{globlib} is executed first to provide the
 
 The other menu items in this group are temporary tests calling procedures from unit \ouni{testcode} and not relevant to be documented here.\\
 
-\evcodx{Segment name}{ComboSeg} is a drop-down list of the available segments. The one selected is expanded to become the lattice, calling \prcod{globlib}{MakeLattice}.
+\evcodx{Segment name}{ComboSeg} is a drop-down list of the available segments. The one selected is expanded to become the lattice, calling \prcod{editorlib}{MakeLattice}.
 
 \evcod{Show lattice expansion}{butlatsh} displays the expanded lattice in the log window.
 
@@ -612,6 +505,86 @@ The other menu items in this group are temporary tests calling procedures from u
 
 \evcod{Clear}{ButLogClr} clears the log window.
 }
+
+
+
+
+\ounih{Global data}{globlib}
+
+\desc{
+This unit is OPAs database containing definitions of global constants and types and declaration of global variables as described in sec.~\ref{seclatdata}. 
+The initialization part is executed when OPA starts and sets environment variables and default values. The unit further contains a couple of public procedures for managing status and user settings.
+}
+
+\uses{\opauni{mathlib}, \opauni{comauxlib}}
+
+
+
+\pvar{}
+Constants include general settings, physical constants, maximum array sizes, color definitions, name strings and values of flags later to be referenced by name.
+
+\unico{Variable\_type} for defining variables is a record including a name, a value and a string containing an arithmetic expression, and the global array named \unico{Variable} stores the variables. 
+
+\unico{ElementType} is a case-record for defining element parameters as listed in tables \ref{tabel2} and \ref{tabel1}: column \unico{in record} lists the fields in the type declaration. The asterisk inicates that a field of same name with suffix \code{\_exp} exists (for example \unico{l*} means \unico{l\_exp}), which may contains an arithmetic expression as string (in order to make use of variables).
+
+\unico{OmarkType} defines a set of optics data as property of the element type "optics marker".
+
+\unico{ElemArr} type is an array of \unico{ElementType}. 
+The global variables \unico{Elem} and \unico{Ella} are of type \unico{ElemArr} and store all elements, resp. the subset of elements currently used in the active lattice. The elements in \unico{Elem} are read from the lattice file and manipulated in the editors, while the elements in \unico{Ella} are modified in the various GUIs. After terminating a design calculation the user is asked to save or cancel the changes, which causes the \unico{Ella}-data to be copied back to the \unico{Elem} array or not.
+
+Furthermore, not listed in the table, the element record contains a field \unico{nl} of type \unico{NameListType} which is a linked containing real element names, power supply names and information on polarity and family topology. 
+\unico{calibrationType} is a record to optionally store the magnet calibration for calculation of currents in \ogui{opacurrents}.
+
+\unico{Segment\_type} is a linked list for defining segments. The record contains a name and two pointers to the first and last entry. These pointers are of type \unico{AbstractElement\_type}, which contains the name of the element or segment, the kind, i.e. if it is an element {\em or} a segment, a flag to tell if the entry is inverted, a number how often to repeat the entry, and two pointers to the previous and next element. The global array \unico{Segm} of \unico{Segment\_type} keeps the segments.
+
+\unico{LatticeType} is a lattice entry, and the global variable \unico{Lattice} is an array of these. The record contains the name and index of the element in the lattice and its orientation (i.e. if it is inverted or not, important for bends with unequal edges). Further it includes the index of a {\em girder} the element sits on, and five real numbers for misalignment and attenuation factors. Two boolean flags tell if the element is coupling and if misalignments were set to speed up calculations later. 
+
+Variable \unico{Glob} of type \unico{GlobType} contains parameters which are used by most units, like the beam energy, the sizes of lattice and element arrays, the optics parameters at the begin and end of the current lattice and more. 
+
+Variable \unico{Beam} of type \unico{BeamParType} contains calculated beam parameters like emittances, tunes etc. However, units making use of beam parameters usually recalculate the lattice at start to make sure that the parameter settings are correct and consistent.
+
+\unico{OpValType} is an extended set of optics data used for propagation in \ouni{elemlib}.
+
+\unico{CurveType} is a point in an optical functions curve including a pointer to the next point.
+
+\unico{CurvePlotType} defines a curve by a pointer to its initial point.
+
+\unico{MainButtonHandles} provides global control of the various options in \ogui{opamenu} to enable or disable them based on the status flags.
+
+Variable \unico{Status} of type \unico{StatusType} contains boolean flags to keep track of the calculation and design progress. 
+Furthermore, the array \unico{StatusLabels} of type \code{TLabel} gives status information in the main menu \ogui{opamenu}. Several constants named \unico{Status\dots} control the appearance.
+
+Variable \unico{SnapSave} of type \unico{SnapSaveType} keeps intermediate results.  Originally it was used at SLS to export data to an EPICS \code{.snap} file for machine control by \ogui{opacurrents}, that's why it is named "snap", but later it was extended to transfer internally calculation results as shown in Fig.~\ref{blockfig} (dashed arrows). 
+Furthermore the record stores some data for synchrotron radiation source points (type \unico{XB\_SnapSaveType}) which once were exported to an camera application in the SLS control system. 
+On the other hand, dynamic aperture data calculated by \ogui{opatrackda} and to be used for fast Touschek tracking in \ogui{opatracktt} are not included in the global \unico{SnapSave} variable in \unico{globlib} but located as a couple of variables named \unico{Flo\dots} in \unico{tracklib}, which is used by these two tracking GUIs.
+
+Arrays \unico{GlobDef} and \unico{Def} keep the user settings. They are of type \unico{DefaultType} which is a record containing a unique name for the setting and its value. The names of recently  used files are stored in string array \unico{LastUsedFiles}. 
+
+
+\ppro{
+
+\unico{Initialization} sets global variables to reasonable initial values, sets all status flags to false, and sets default values for the user settings.
+Then it sets the OPA folder and tries to read the files \code{opa4\_path.ini} which contains a list of last used files, and \code{opa4\_glob\.ini} containing global user settings. Finally, it takes the folder from the first entry in the list of last used files to set the working folder and reads the local file \code{opa4\_set.ini} in this folder to restore the user settings. If these files are missing, the default values are used.
+
+\unico{GlobDefWriteFile} and \unico{DefWriteFile} write the user settings back to these files if the session is regularly terminated by \evcod{opamenu}{ExitOPA}.
+
+\unico{AppendCurve, ClearCurve}  prepare data sets for plotting curves of optical functions. 
+
+\unico{AppendChar} builds a linked list of characters for \ogui{opatexteditor} \todo{(wrong place)}.
+
+\unico{putkval, getkval, putSexkval, getSexkval} functions are shortcuts to set or get the parameter which is considered the strength of a magnet.
+
+\unico{EllaSave} checks if elements in lattice (\unico{Ella}) have been changed with regard to the original elements (\unico{Elem}) and ask the user if the changes should be saved.
+
+\unico{OPALog} writes a message to the log window in \ogui{opamenu}.
+
+\unico{MainButtonEnable} enables or disables the options in \ogui{opamenu} depending on the status flags. For example, tracking is only enabled if a periodic solution exists.
+
+\unico{PassMainButtonHandles} and \unico{passErrLogHandle} take handles to the GUI components of \ogui{opamenu} to enable other units using \ouni{globlib} to enable/disable them.
+}
+
+
+
 
 
 \ounih{Mathematics library}{mathlib}
@@ -634,16 +607,17 @@ Most procedures are elementary operations on vectors, matrices and complex numbe
 
 \unico{LUDCMP} and \unico{LUBKSB} peform LU-decomposition and backsubstitution to solve linear systems of equations as described in \cite{numrec}. This is used in particuar for matrix inversion, \unico{MatInv} and \unico{MatDet}. The procedures are set fix to 5 dimensions.
 
-
 \unico{svdcmp} and \unico{svbksb} perform singular value decomposition and backsubstitution to solve linear systems of equations as described in \cite{numrec}. SVD is superior to LUD for non-square and degenerate systems. An packing/unpacking algorithms was added to use the procedures with arbitrary dimension. The procedure is used in orbit correction in \ogui{opaorbit} and for setting octupole families in \ogui{opachroma}.
 
 \unico{Powell} is an implementation of Powell's minimizer for steepest gradient search in $N$ dimensions taken from \cite{numrec}. It is used for sextupole optimization in \ogui{opachroma}, for longitudinal gradient optimization in \ogui{opalgbedit}, and (test mode only) for non-linear optimization in \ogui{opamomentum}.
 }
 
-\ounih{Graphics library}{../com/vgraph}
+
+
+\ounih{Graphics library}{comvgraphlib}
 
 \desc{
-Class \unico{Vplot} based on \code{TObject} contains a Lazarus \code{TCanvas} object. Plot commands for \code{TCanvas}  use integer screen pixel coordinates. \ouni{../com/vgraph} wraps these standard plotting commands with procedures of same name but accepting physics coordinates as real numbers. Data are either scaled and forwarded to \code{TCanvas}  or written to an Ecapsulated postscript file \code{*.eps}.
+Class \unico{Vplot} based on \code{TObject} contains a Lazarus \code{TCanvas} object. Plot commands for \code{TCanvas}  use integer screen pixel coordinates. \ouni{comvgraphlib} wraps these standard plotting commands with procedures of same name but accepting physics coordinates as real numbers. Data are either scaled and forwarded to \code{TCanvas}  or written to an Ecapsulated postscript file \code{*.eps}.
 
 Furthermore procedures for crating nice axes, for drawing circles and ellipses and for grabbing the screen image have been added.
 }
@@ -673,7 +647,7 @@ There are no public variables. A GUI will define one or more variables of class 
 
 \unico{Axis} plots an axis with even numbers as annotations and ranges, also extracting an exponent if needed. 
 
-\unico{GetAxisSpace} returns the space required for the axis annotations without drawing the axis in order to adjust the plot range accordingely. It is called first by the calling GUI, in particular by \oguif{../com/asfigure}.
+\unico{GetAxisSpace} returns the space required for the axis annotations without drawing the axis in order to adjust the plot range accordingely. It is called first by the calling GUI, in particular by \oguif{comfigureframe}.
 
 \unico{Circle} and \unico{Ellipse} plot a circle or a (sheared) ellipse in beam dynamics notation.
 
@@ -689,19 +663,19 @@ All the other procedures are mainly wrappers for the standard plot commands or s
 
 \begin{figure}\centering
 \includegraphics[scale=0.8]{vplotcoor.png}
-\caption{\label{vprange}\ouni{../com/vgraph} coordinates}
+\caption{\label{vprange}\ouni{comvgraphlib} coordinates}
 \end{figure}
 
 
 
-\oguifh{Plot area}{../com/asfigure}
+\oguifh{Plot area}{comfigureframe}
 This frame contains a paintbox (i.e. a plot area) to be embedded in a GUI and a \unico{Vplot} object using the paintbox canvas. 
 Added functionality includes handles to edit fields in order to translate mouse actions to numbers. 
 
-\uses{\ouni{../com/vgraph}, \ouni{../com/asaux}}
+\uses{\ouni{comvgraphlib}, \ouni{comauxlib}}
 
 \pvar{
-\guifco{plot} is a variable of class \unico{Vplot} in \ouni{../com/vgraph}. It is accessible to the parent GUI for direct plotting.
+\guifco{plot} is a variable of class \unico{Vplot} in \ouni{comvgraphlib}. It is accessible to the parent GUI for direct plotting.
 
 }
 
@@ -737,7 +711,7 @@ When the mouse is dragged, the region between mouse down and up is used to resca
 
 
 
-\ounih{Contour plot calculation}{../com/conrect}
+\ounih{Contour plot calculation}{comcontourlib}
 
 \desc{This contour plot calculation is taken from \cite{CONRECT} with minor adaptations. Given a 2D array of rectangular gridded data it returns an array of contour lines.}
 
@@ -748,10 +722,10 @@ When the mouse is dragged, the region between mouse down and up is used to resca
 \ppro{
 \unico{Conrec} is the only procedure, calculating the contours.}
 
-\ounih{Utilities}{../com/asaux}
+\ounih{Utilities}{comauxlib}
 
 \desc{This unit is a collection of "little helpers" for formatting numbers and strings, for defining colors etc. Some of this functions may be obsolete meanwhile, since newer versions of Lazarus and Pascal may include corresponding functions.
-Procedures are short and probably self-explaining. Not all of them are used in OPA (the \code{../com} folder units are used by several programs).}
+Procedures are short and probably self-explaining. Not all of them are used in OPA (the \code{com*} files may be used by other programs too.}
 
 \uses{none}
 
@@ -766,7 +740,7 @@ There is an option to read additional files of magnet calibrations and allocatio
 Files from other beam dynamics programs can be read and written, however, this includes only the basic parameters and may require some manual editing to make these files work. This includes Tracy-2 or -3 files \code{*.lat}, Elegant files \code{*.ele,*.lte}, MAD files \code{*.mad} and MAD sequence files \code{*.seq}.
 }
 
-\uses{\ouni{globlib}, \ouni{mathlib}, \ouni{../com/asaux}}
+\uses{\ouni{globlib}, \ouni{editorlib}, \ouni{varlib}, \ouni{mathlib}, \ouni{comauxlib}}
 
 \ppro{
 \unico{Latread} evaluates the character list of type \unico{TextBuffer}: comments, enclosed by \{ \} brackets, are skipped. An input line is terminated by a semicolon (;), its length is unlimited and it may break over several lines in the lattice file.  Input lines are evaluated by searching first for a colon (:) which identfies an element or segment, or, if not found, a variable.
@@ -782,7 +756,7 @@ For a segment the tokens are names of elements or segments, both are  assigned t
 
 If names of allocation or calibration files were given, these files are read now.
 
-Finally, the lattice is built from the last segment calling \prcod{globlib}{MakeLattice}.\\
+Finally, the lattice is built from the last segment calling \prcod{editlib}{MakeLattice}.\\
 
 
 \unico{LatReadCom} is called after LatRead and searches the lattice string for a pair of tokens \code{\{com} and \code{com\}} to save the text between. All other comments contained in the lattice and enclosed in \{ \} brackets only are not saved.\\
@@ -809,7 +783,7 @@ Further export of data is straightforward: first variables, then elements, then 
 \oguih{Text Editor}{opatexteditor} 
 \desc{A simple Notepad-like text editor to edit the lattice file. The content of the edit window is one variable of type \unico{textbuffer}, i.e. the editor "does not know" what the content means. At exit or when a test is requested, \prcod{latfilelib}{LatRead} is used to analyze the lattice.}
 
-\uses{\ouni{globlib}, \ouni{latfilelib}}
+\uses{\ouni{globlib}, \ouni{editorlib}, \ouni{latfilelib}}
 
 \ppro{
 \guico{Init} called from \ogui{opamenu} accepts a handle to the drop down list of segments in order to change its content when segments are created or deleted.
@@ -823,7 +797,7 @@ Further export of data is straightforward: first variables, then elements, then 
 \evcod{Test}{filetest} performs a test of the input by calling \prcod{latfilelib}{LatRead}. Before, the input is copied into a buffer, then, by calling \prcod{globlib}{PassErrLogHandle}, the output from \unico{LatRead} is redirected from the \ogui{opamenu} main log window to the local error log window \guico{myerrlog}, because the main GUI may be covered by the text editor GUI. If the test is successful, the \ofld{OK} button is enabled. Then the handle for output is set back to the main GUI.
 
 
-\evcod{OK}{fileget} reads the lattice in the same way, now knowing that the input is a valid lattice, and exits. At Exit, the segment drop down list in the mnain GUI is set to the last segment, from which the lattice was built by \prcod{latfilelib}{LatRead}.
+\evcod{OK}{fileget} reads the lattice in the same way, now knowing that the input is a valid lattice, and exits. At Exit, the segment drop down list in the main GUI is set to the last segment, from which the lattice was built by \prcod{latfilelib}{LatRead}.
 
 \evcod{Cancel}{fileRestore} ignores the text window, reads the lattice from the buffer as saved at \guico{Init} and exits.
 
@@ -837,14 +811,14 @@ The "OPA Editor" allows to create elements and compose a lattice without knowing
 
 The GUI displays two lists, one for variables and elements, the other one for segments. In addition some global parameters like beam energy and default magnet aperture may be set.
 
-\uses{\ouni{globlib}, \ogui{oelecreate}, \ogui{oeleedit}, \ogui{osegedit}, \ouni{../com/asaux}}
+\uses{\ouni{globlib}, \ouni{editorlib}, \ouni{varlib}, \ogui{oelecreate}, \ogui{oeleedit}, \ogui{osegedit}, \ouni{editorlib}, \ouni{comauxlib}}
 
 \ppro{
 \guico{Init} called from \ogui{opamenu} accepts a handle to the drop down list of segments in order to change its content when segments are created or deleted. Init is also called internally to update the list contents.
 }
 
 \act{
-\evcodx{Element list}{ListBoxEClick}: if the first line of the list is licked, the object \guico{EditElemCreate} of class \ogui{oelecreate} is initialized by passing handles to this list and to the \ogui{osegedit} object for editing segments. If another line of the list is clicked then object \guico{EditElemSet} of class \ogui{oeleedit} is intitalized by calling two different procedures depending on if the clicked item represents a variable or an element, and a handle to this list is passed.
+\evcodx{Element list}{ListBoxEClick}: if the first line of the list is clicked, the object \guico{EditElemCreate} of class \ogui{oelecreate} is initialized by passing handles to this list and to the \ogui{osegedit} object for editing segments. If another line of the list is clicked then object \guico{EditElemSet} of class \ogui{oeleedit} is intitalized by calling two different procedures depending on if the clicked item represents a variable or an element, and a handle to this list is passed.
 
 \evcodx{Segment List}{ListBoxSClick} initializes object \guico{EditSegSet} of class \ogui{osegedit} by passing a handle to this list.
 
@@ -870,7 +844,7 @@ The GUI displays two lists, one for variables and elements, the other one for se
 
 \desc{This small GUI pops up, when \code{new entry} is clicked in the \ouni{opaeditor} elements and variables list. A new element or variable is created after selecting its type and giving it a name. Then the GUI is closed and the \ogui{oeleedit} GUI pops up.}
 
-\uses{\ouni{globlib}, \ogui{oeleedit}, \ogui{osegedit} }   
+\uses{\ouni{globlib}, \ouni{editorlib}, \ogui{oeleedit}, \ogui{osegedit} }   
 \ppro{
 \guico{Init} accepts handles to the \ogui{opaeditor} elements list and to the segment editor \ouni{osegedit}, because if an element is created or subsequently modified by \ogui{oeleedit}, the changes should appear in these two GUIs. Then the list of element types is filled with the types defined in \ouni{globlib}.
 }
@@ -894,12 +868,12 @@ The GUI displays two lists, one for variables and elements, the other one for se
 Main component of the GUI is a table to edit all parameters of an element or a variable. Some fields may contain algebraic expressions to calculate parameters from variables. This procedure is called in four different ways, for elements and for variables, and from editor or from optics design. For (iron dominated) magnets, a possible pole-profile is plotted.
 }
 
-\uses{\ouni{globlib}, \ouni{linoplib}, \oguif{../com/asfigure}, \ouni{../com/asaux}}
+\uses{\ouni{globlib}, \ouni{editorlib}, \ouni{varlib}, \ouni{linoplib}, \oguif{comfigureframe}, \ouni{comauxlib}}
 
 \ppro{
 \guico{InitE}, \guico{InitEVar}, \guico{InitO},  \guico{InitOVar} are four different initialization procedures, for elements and variables, and for calling from the interactive editor \ogui{opaeditor} or from the linear optics design \ogui{opalinop}. In edit mode, a handle to the element list in \ogui{opamenu} is passed, the element index is taken from the list, and the element to be edited is taken from the original element array \unico{Elem}. In optics mode, the index is given explicity and adresses the \unico{Ella} subset of elements in the lattice, and a handle to the plot window of \ogui{opalinop} is passed to enable an update of the plot when the element is changed. For variables there is only one array \unico{Variable} (The arrays are defined in \ouni{globlib}). \\
 Then two private procedures are called, which are common for edit and optics mode, to fill the table with data of the element or variable. For elements several lines are filled depending on the type of element, for variables it is only one line. Some element properties and variables may have a value {\em and} an arithmetic expression (like "A+B"), which is a string for variables and a pointer for elements. If the string is empty or the pointer is \code{nil}, the value is taken in edit mode. In optics mode, the calculated value from the expression is shown too ("2.5 = A+B") for elements. For variables the expression is shown in both modes.\\
-If the element is a quadrupole or a bending magnet, the GUI is extended by a plot area of type \oguif{../com/asfigure} to show its pole profile.
+If the element is a quadrupole or a bending magnet, the GUI is extended by a plot area of type \oguif{comfigureframe} to show its pole profile.
 
 \guico{getJelem} just returns the index of the selected element in order to enable \ogui{opalinop} to kill this GUI if the user assigns the element to a knob.
 }
@@ -924,7 +898,7 @@ For variables, the private procedure \guico{SetVar} performs similar actions: In
 The GUI displays an editable string grid with names of elements and segments, which are marked in color depending on its kind and type. 
 }
 
-\uses{\ouni{globlib}, \ouni{../com/asaux}}
+\uses{\ouni{globlib}, \ouni{editorlib}, \ouni{comauxlib}}
 
 \ppro{
 \guico{Init} passes a handle to the segment list in \ogui{opaeditor} and loads the abstract element sequence of the segment, which was clicked in the list, into the string grid. If entries contain an inversion flag or a multiplication factors, this is written to the grid cell too. The segment name is written to the \ofldx{Modify segment} name field at top, and its periodicity (replication factor) to the \ofldx{periodicity} field at bottom. If the first line of the segment list was clicked, a new segment is to be created and grid and name edit field stay empty.
@@ -939,14 +913,53 @@ The GUI displays an editable string grid with names of elements and segments, wh
 \evcod{update}{butokClick} and \evcod{create}{butcreClick} call private procedure \guico{SaveSeg} to read the grid cells and edit fields, and to perform several checks before creating or updating the segment:\\
 If the grid is empty and the segment is not used by any other segment, then the segment is deleted, otherwise an error message is sent.\\
 If the name is invalid or if the name already exists, or if the  segment contains unknown names, error messages are sent.\\
-If tests were successful, in case of \ofldx{create} a new segment is appended to the list, in case of \ofldx{update} the existing segment is deleted first by disposing all its abstract element pointers in \prcod{globlib}{ClearSeg}.\\
+If tests were successful, in case of \ofldx{create} a new segment is appended to the list, in case of \ofldx{update} the existing segment is deleted first by disposing all its abstract element pointers in \prcod{editorlib}{ClearSeg}.\\
 If an existing segment was renamed, the entry is updated in all others segments. Then, 
-the new segment sequence is saved as linked list of abstract elements by \prcod{globlib}{AppendAE}. If the segment was deleted, it is removed from the global \unico{Segm} array and from the \ogui{opaeditor} segment list, else the list is updated. Finally the exit procedure destroys the GUI.
+the new segment sequence is saved as linked list of abstract elements by \prcod{editorlib}{AppendAE}. If the segment was deleted, it is removed from the global \unico{Segm} array and from the \ogui{opaeditor} segment list, else the list is updated. Finally the exit procedure destroys the GUI.
 
 \evcod{delete}{butdelClick} sets all grid cells to empty strings and performs the delete procedures for an empty segment as described above, and exits.
 
 \evcod{cancel}{butcanClick} does nothing but exit.
 }
+
+\ounih{Arithmetic evaluator}{varlib} 
+
+\desc{
+Evaluation of arithmetic expressions in variables or elements uses an arithmetic evaluator, which was taken from \cite{rosetta} and slightly modified. Evaluation is called recursively since variables may be nested. Only basic operators \code{( + - * / )} are supported. An arbitrary number of bracket pairs is allowed.
+}
+
+\uses{\ouni{globlib}}
+
+\pvar{There are no public variables.}
+
+\ppro{
+\unico{Eval\_Exp} accepts a string expression and returns the result of the evaluation and a flag to tell if an error occurred.
+
+\unico{Get\_Eval\_exp\_errmess} returns the error message.
+}
+
+
+
+\ounih{Editor functions}{editorlib} 
+\desc{
+}
+\uses{\ouni{globlib}, \ouni{mathlib}, \ouni{comauxlib}}
+
+\ppro{}
+
+\unico{FillComboSeg} fills the list of last used files in \ogui{opamenu}.
+
+\unico{MakeLattice} builds the lattice from elements and segments. Since a segment itself contains elements and segments, the internal procedure \unico{SegLat} is called recursively to unpack the data. 
+%If a list of real names (from machine control system) is available, these names are 
+The elements, which are used in the lattice are copied from the \unico{Elem} to the \unico{Ella} array, and correctors and monitors with generic names \code{CH,CV,MON}
+are expanded into separate instances named \code{CH001,CH002...} to adress them individually in orbit correction in unit \ogui{opaorbit}. Finally status flags are set.
+
+
+\unico{IniElem} sets default values for new elements.
+
+\unico{AppendAE, ClearSeg, NAESeg} are procedures to handle segments, which are series of pointers to elements or other segments.
+
+
 
 
 \oguih{Longitudinal gradient bend editor}{opalgbedit} 
@@ -956,14 +969,14 @@ the new segment sequence is saved as linked list of abstract elements by \prcod{
 \todo{Although this GUI is well elaborated its practical use turned out to be limited, since the ideal LGB solution usually is compromised by contraints from optics and magnet design. Actually, deviations from the ideal field shape don't affect the emittance very much, and a simple low-high-low field "sandwich" magnet often is good enough. Therefore this GUI is considered as "nice to have", and detailed documentation of the \ogui{opalgbedit} and \ouni{lgbeditlib} units is postponed until the usefulness for design or education becomes more clear.
 }
 
-\uses{\ouni{globlib}, \ouni{mathlib}, \oguif{../com/asfigure}, \ouni{../com/asaux}}
+\uses{\ouni{globlib}, \ouni{mathlib}, \oguif{comfigureframe}, \ouni{comauxlib}}
 
 
 
 \ounih{LGB calculations}{lgbeditlib} 
 \desc{Physics procedures for LGB optimizaiton and plotting of results.}
 
-\uses{\ouni{globlib}, \oguif{../com/asfigure}, \ouni{../com/asaux}}
+\uses{\ouni{globlib}, \ouni{editorlib}, \ouni{varlib}, \oguif{comfigureframe}, \ouni{comauxlib}}
 
 
 
@@ -972,12 +985,12 @@ the new segment sequence is saved as linked list of abstract elements by \prcod{
 
 \oguih{Linear optics design}{opalinop} 
 
-\desc{This is the main GUI for linear optics development. It contains a plot window to show optical functions along the lattice, a table to display beam parameter results, a couple of knobs to be assigned to elements and several buttons for various options and for changing the display. Unlike all other GUIs, the plot window here is not based on \oguif{../com/asfigure}, because it is too complex. All the beam dynamics calculations are done by \ouni{linoplib}.}
+\desc{This is the main GUI for linear optics development. It contains a plot window to show optical functions along the lattice, a table to display beam parameter results, a couple of knobs to be assigned to elements and several buttons for various options and for changing the display. Unlike all other GUIs, the plot window here is not based on \oguif{comfigureframe}, because it is too complex. All the beam dynamics calculations are done by \ouni{linoplib}.}
 
-\uses{\oguif{knobframe}, \ogui{ostartmenu}, \ogui{otunematrix}, \ogui{owriteomrk},\ogui{obetenvmag}, \ogui{omatching}, \ouni{linoplib}, \ogui{opatunediag}, \ogui{oeleedit}, \ouni{globlib}, \ouni{mathlib}, \ouni{../com/vgraph}, \ouni{../com/asaux}} 
+\uses{\oguif{knobframe}, \ogui{ostartmenu}, \ogui{otunematrix}, \ogui{owriteomrk},\ogui{obetenvmag}, \ogui{omatching}, \ouni{linoplib}, \ogui{opatunediag}, \ogui{oeleedit}, \ouni{globlib}, \ouni{mathlib}, \ouni{comvgraphlib}, \ouni{comauxlib}} 
 
 \ppro{
-\guico{Init} is called from \ogui{opamenu} passing a handle to a tune diagram as defined in \ogui{opatunediag}, which is further passed to \ouni{linoplib}. A \unico{Vplot} object as defined in \ouni{../com/vgraph} is created, the corresponding variable for the plot window named \unico{vp}, however, is defined in \ouni{linoplib}, where the calculations take place. A handle to the parameter table \guico{tab} is also passed to \ouni{linoplib}. Then some inital values are set for various data.\\
+\guico{Init} is called from \ogui{opamenu} passing a handle to a tune diagram as defined in \ogui{opatunediag}, which is further passed to \ouni{linoplib}. A \unico{Vplot} object as defined in \ouni{comvgraphlib} is created, the corresponding variable for the plot window named \unico{vp}, however, is defined in \ouni{linoplib}, where the calculations take place. A handle to the parameter table \guico{tab} is also passed to \ouni{linoplib}. Then some inital values are set for various data.\\
 If the lattice contains variables, copies of their values are saved, and all elements containing expressions are evaluated to check if the variables are used or not in the lattice. For each variable in use, a label is created underneath the plot window. If it is a primary variable (i.e. a number), which can be edited, the label is yellow, if it is a dependant variable (i.e. an expression) the label is pale yellow.\\
 Finally the GUI is resized based on saved user settings. This causes a repaint event of the plot area:
 }
@@ -1016,7 +1029,7 @@ If the right mouse button is pressed, the optical function values at this locati
 \evcod{-\textgreater txt}{butdataClick} writes four text files to the working folder, which are named \code{(opa file name)\_data, \_beta, \_mag, \_rad.txt}. They contain the equilibrium beam parameters, the beta functions along the lattice, the magnet field data and another output of beta functions for radiation calculations. 
 
 \evcod{-\textgreater EPS}{butepsClick} exports the plot to an encapsulated postscript file in the workig folder, which is named \code{(opa file name)\_betas, \_envel, \_magfd.eps} depending if betas, envelopes or magnetic fields are shown. 
-The procedure \guifco{PS\_start} and \guifco{PS\_stop} are called to switch on and off the postscript mode in \ouni{../com/vgraph}.
+The procedure \guifco{PS\_start} and \guifco{PS\_stop} are called to switch on and off the postscript mode in \ouni{comvgraphlib}.
 
 \evcod{Exit}{butexitClick} calls \prcod{globlib}{EllaSave} to check for changes of element parameters and to ask the user to save the changes. Then user settings are saved and the GUI is closed.
 
@@ -1039,7 +1052,7 @@ The procedure \guifco{PS\_start} and \guifco{PS\_stop} are called to switch on a
 
 \desc{This component provides a knob to control an element parameter considered as strength as defined by \prcod{OPAgloal}{putkval/getkval}. Values may be set by slider or edit field, including range limits and a reset function. As many knobs as fit into the GUIs are dynamically embedded in optics design \ogui{opalinop} and orbit correction \ogui{opaorbit}. Knob actions trigger calculations and plots. Knobs may stay passive and only display the value, if the parameter is an expression controlled by a variable (which may be connected to another knob). Therefore a knob has to know his fellow knobs and to trigger their updates.}
 
-\uses{\ouni{linoplib}, \ouni{globlib}, \ouni{mathlib}, \ouni{../com/asaux}} 
+\uses{\ouni{globlib}, \ouni{mathlib}, \ouni{varlib}, \ouni{linoplib},  \ouni{comauxlib}} 
  
 \ppro{
 \guifco{Init} gives a name using an index provided by the calling GUI (because it numbers the knobs) and initializes the knob as being not yet connected.
@@ -1053,7 +1066,7 @@ The procedure \guifco{PS\_start} and \guifco{PS\_stop} are called to switch on a
 \guifco{UnLoad} removes the element/variable tags and sets back all captions to the initial status of being not connected.
 
 \guifco{KUpdate} sets the knob to a new value by adjusting edit field and slider, and, if exceeded, also the range limits. If the knob was updated manually, private procedure \guifco{Action} is called to trigger calculations and plots and, if needed, to update the other knobs. If the knob is updated in this way from another plot, no further action takes place.\\
-If the knbos are components of \ogui{opalinop} the {\em optics} is re-calculated and the plot is updated depending which mode (betas, envelopes, magnetic field) is set.
+If the knobs are components of \ogui{opalinop} the {\em optics} is re-calculated and the plot is updated depending which mode (betas, envelopes, magnetic field) is set.
 If the knob is component of \ogui{opaorbit} the {\em orbit} is re-calculated and the plot is updated.\\
 If the knob is connected to a variable, changing it may affect other knobs connected to elements or variables using {\em this} variable in an expression. So all elements' expressions are evaluated to update their values, and, if they are connected to another knob, the \guifco{KUpdate} procedure is called for the {\em other} knob (therefore it's not a circular reference). Of course, this affects only knobs which are in passive mode. \todo{This feature is yet only implemented for optics mode, since in orbit/injection mode no expressions are allowed for corrector magnets and kickers, which are the only elements to be connected. Thus it wasn't needed, however this is an uneccessary restriction.}
 
@@ -1076,7 +1089,7 @@ If the knob is connected to a variable, changing it may affect other knobs conne
 
 \desc{This GUI pops up on initialization of the optics module  \ogui{opalinop} or the orbit/injection module \ogui{opaorbit} (see sec.\ref{secorin}), or when pressing the \ofld{Start} buttons in these modules. The starting conditions for the optics calculation are to be selected, either periodic/symmetric, or forward/backward from start/end of lattice or from one of the optics markers. In case of forward/backward calculation the initial beam parameters may be entered manually, in orbit/injecition mode this is only the orbit. In optics mode it includes also the normal mode beta functions, the dispersions and the elements of the coupling matrix.}
 
-\uses{\ouni{linoplib}, \ouni{globlib}, \ouni{mathlib}, \ouni{../com/asaux}} 
+\uses{\ouni{linoplib}, \ouni{globlib}, \ouni{mathlib}, \ouni{comauxlib}} 
 
 \ppro{
 \guico{Load} accepts a number for the mode of operation, which is 0,1,2 for optics, orbit, injection, and a handle to the parent form, which is either \ogui{opalinop} or \ogui{opaorbit}. Depending on the mode radio buttons to select periodic/symmetric or forward/backward options are enabled or disabled (per/symm makes no sense in injection mode). Then the lattice is searched for optics marker and corresponding radio buttons are added to the GUI. In optics mode a check box to perform calculations with or without coupling becomes visible and is checked at start if the lattice contains coupling elements. Finally the panels to enter/edit initial beam parameters are enabled/disabled and filled with data calling the private procedure \guico{set\_pan\_ini}.
@@ -1106,7 +1119,7 @@ If the knob is connected to a variable, changing it may affect other knobs conne
 \desc{This GUI is launched by \ogui{opalinop} to select what to show: beta functions (normal mode and/or projected) and dispersions, envelopes with orbit and apertures or magnetic fields. Additional parameters may be set.
 }
 
-\uses{\ouni{globlib}, \ouni{mathlib}, \ouni{../com/asaux}} 
+\uses{\ouni{globlib}, \ouni{mathlib}, \ouni{comauxlib}} 
 
 \ppro{
 \guico{Load} sets GUI components (check boxes, fields etc.) for the current plot settings (explained below) and saves initial settings in order to restore them later.
@@ -1142,13 +1155,13 @@ If the knob is connected to a variable, changing it may affect other knobs conne
 
 This small GUI launched by \ogui{opalinop} calculates a $2\times 2$ sensitivity matrix how the lattice tunes depend on a scaling factor applied to the two groups of all horizontally and all vertically focusing quads. A new tune may be entered manually, and the inverse of the sensitivity matrix is then used to adjust all quads correspondingly. This procedure converges for small tune changes and was also used in SLS control by exporting the sensitivity matrix to EPICS channels from module \ogui{opacurrents}. The code is simple and may not need further explanation.
 
-\uses{\ouni{linoplib}, \ouni{globlib}, \ouni{mathlib}, \ouni{../com/asaux}} 
+\uses{\ouni{linoplib}, \ouni{globlib}, \ouni{mathlib}, \ouni{comauxlib}} 
 
 
 \oguih{Optics marker update}{owriteomrk} 
 \desc{Optics markers are markers in the lattice which can store beam data (betas etc.) and may be used as starting points for forward/backward calculations by \ogui{ostartmenu}. This GUI establishes a list of all optics markers in the lattice with tick marks and asks if their data should be overwritten with the current optics solution. This may be ambiguos since an optics marker may appear several times in a lattice, so the data refer to the first instance, counting from begin of lattice. The code is simple and may not need further explanation.}
 
-\uses{\ouni{globlib}, \ouni{../com/asaux}} 
+\uses{\ouni{globlib}, \ouni{comauxlib}} 
 
 
 
@@ -1161,8 +1174,8 @@ Plot routines show beta functions and dispersions, or orbit, envelopes and apert
 }
 
 
-\uses{
- \ouni{elemlib}, \ogui{opatunediag}, \ouni{globlib}, \ouni{mathlib}, \ouni{../com/vgraph}, \ouni{../com/asaux}}
+\uses{\ouni{globlib}, \ouni{varlib},
+ \ouni{elemlib}, \ogui{opatunediag},  \ouni{mathlib}, \ouni{comvgraphlib}, \ouni{comauxlib}}
 
 \pvar{
 Several variables used by \ogui{opalinop}, \ogui{ostartmenu} etc. are defined in the interface section, i.e. as public, for convenience (i.e. lazyness). Most of them are flags to control the flow. Few of them may require an explanation:
@@ -1233,7 +1246,7 @@ $\alpha_x=\alpha_y=D_x'=0$ and works only for uncoupled lattices. It is rarely u
 
 \ounih{Element calculations}{elemlib} 
 
-\desc{This unit contains the procedures to propagate optical parameters through the different elements in the lattice. They all receive the variable \unico{mode} telling them what to include in the calculation, by evaluating \prcod{globlib}{switch}. Most elements receive the varialbe \unico{idir} to set forward or reverse orientation of the element (for example important for a dipole with different edge angles). All other parameters are explained in the user guide \cite{userguide}. 
+\desc{This unit contains the procedures to propagate optical parameters through the different elements in the lattice. They all receive the variable \unico{mode} telling them what to include in the calculation, by evaluating \prcod{elemlib}{switch}. Most elements receive the varialbe \unico{idir} to set forward or reverse orientation of the element (for example important for a dipole with different edge angles). All other parameters are explained in the user guide \cite{userguide}. 
 The flags \unico{UseSext,UsePulsed} in \ouni{globlib} switch on/off non-linearities and kickers. Coupled calculation is selected by the element procedures. Another set of procedures performs the sliced calculations for thick elements to provide data in pixel-resolution for a nice display. 
 }
 
@@ -1291,7 +1304,7 @@ The \unico{SliceSet} function calculates the number of slices for the optical fu
 
 \unico{SlicingN} receives transfer matrices \unico{msl} for a slice, \unico{mof} for the invisible part of the element left of the plot window, and \unico{min} and \unico{mex} for edge focusing at entry and exit of the element (applies to bends only). Additional matrices \unico{mof0,msl0} without dispersion down-feeds are supplied to show both orbit and dispersion functions correctly. The procedure further receives the optics values at the entry to the element, because these are known from the previous run of \prcod{linoplib}{Lattel}. Then optical parameters at the slices are calculateed using a simplified propagation procedure and the results are appended to the \vrcod{globlib}{Curve} variable for later plotting by \ouni{linoplib}. Finally the optics value at the end of the calculation (which may be still inside the element) overwrite the optics values from input.
 
-\unico{SkippingN} is only needed for undulators, which are modelled as a loop over drifts and bends, and where several of these basic elements may be left of the plot window. The optics values are propagated through these invisible basic elements to get the correct initial values at the first partially visible undulator pole. \feature{In this wasy it is possible to zoom into an undulator and see the dispersion oscillation!}
+\unico{SkippingN} is only needed for undulators, which are modelled as a loop over drifts and bends, and where several of these basic elements may be left of the plot window. The optics values are propagated through these invisible basic elements to get the correct initial values at the first partially visible undulator pole. \feature{In this way it is possible to zoom into an undulator and see the dispersion oscillation!}
 
 The \unico{Slice(Drift,Quad,Sol,Bend)N} procedures call \unico{SliceSet} and calculate the required transfermatrices for \unico{SlicingN} and \unico{SkippingN}.
 
@@ -1310,7 +1323,7 @@ There are three panels at the right side of the GUI, one for the knobs, one for 
 \todo{The algorithm itself with catches for errors as implemented over the years, is quite robust and could be used further in principle. However, nowadays better and well proven solvers may be available, which also include limit ranges for the knobs. Further, the present procedure is restricted to uncoupled lattices and to only one intermediate point besides start and end of matching, which sometimes is a nuisance. The present GUI is well consistent (how options are enabled etc.) but its rigid structure makes extensions cumbersome. It should be re-organized for example using tabs.}\\
 Expecting a rewrite of this module in future, only a brief summary of the most important actions will be given here.}
 
-\uses{\ouni{linoplib}, \oguif{knobframe}, \ogui{omatchscan}, \ouni{globlib},  \oguif{../com/asfigure}, \ouni{../com/asaux}} 
+\uses{\ouni{linoplib}, \oguif{knobframe}, \ogui{omatchscan}, \ouni{globlib},  \oguif{comfigureframe}, \ouni{comauxlib}} 
 
 \ppro{
 \guico{Load} initializes the GUI. It receives handles to the \code{PaintBox} plot window and to the array of \oguif{knobframe} knobs in \ogui{opalinop} in order to be able to set the knobs to new values and to show the new optical functions after matching. Then it searches for optis markers, which may be used as start, end or intermediate point for matching, and adds them to the \guico{ini/mat/midpoint} pulldown lists. Several user settings are restored from a previous session, since often the same matching scenario is used again.
@@ -1341,14 +1354,14 @@ Expecting a rewrite of this module in future, only a brief summary of the most i
 
 \desc{This very simple modal GUI is launched by \evcod{omatching}{ScanClick} that the user may enter the range for a parameter scan. At exit it writes the data to the variable \vrcod{linoplib}{ScanPar}, from where \ogui{omatching} takes them to perform the scan.}
 
-\uses{\ouni{linoplib}, \ouni{globlib}, \ouni{../com/asaux}} 
+\uses{\ouni{linoplib}, \ouni{globlib}, \ouni{comauxlib}} 
 
 
 \oguih{Tune diagram}{opatunediag}
 
 \desc{The tune diagram GUI is created at start of OPA already and provides the variable \guico{tuneplot}, which is passed in the initialization procedures of the modules using it: \ogui{opalinop} shows the working point, i.e. the tunes of a periodic solution. \ogui{opamomentum} shows the variation of tunes with momentum. \ogui{opachroma} shows an analytical estimate of the tune footprint. And \ogui{opatrackps} shows the amplitude dependent tune variation. In the background always shown is the web of resonance lines.}
 
-\uses{\ouni{globlib}, \oguif{../com/asfigure}, \ouni{../com/asaux}}
+\uses{\ouni{globlib}, \oguif{comfigureframe}, \ouni{comauxlib}}
 
 \ppro{
 \guico{Diagram} makes the tune diagram visible if a periodic solution exists. Input is the point in tune space where to center the diagram.  The resonance lines inside the visible tune region up to the selected order are calculated by private procedure \unico{getLines} and characterized as regular, skew, non-systematic.  The periodicity of the lattice is stored in \vrcod{globlib}{NPer} and determines the selection of systematic resonances. 
@@ -1382,7 +1395,7 @@ OPA does not contain true longitudinal dynamics, i.e. all calculations are for f
 Therefore only the first part of the GUI is briefly explained here.
 }
 
-\uses{\ouni{momentumlib}, \ouni{linoplib}, \ogui{opatunediag}, \ouni{globlib}, \ouni{mathlib}, \oguif{../com/asfigure}, \ouni{../com/asaux}} 
+\uses{\ouni{momentumlib}, \ouni{linoplib}, \ogui{opatunediag}, \ouni{globlib}, \ouni{mathlib}, \oguif{comfigureframe}, \ouni{comauxlib}} 
 
 \ppro{
 \guico{Start} called from \ogui{opamenu} receives a handle to the tune diagram. Then it assigns handles defined in \ouni{momentumlib} to some of its GUI components to give \ouni{momentumlib} access. Then user settings are restored, and some initialization is done, and the GUI is resized.
@@ -1414,7 +1427,7 @@ Events not mentioned are either trivial ( e.g. check for valid number in edit fi
 \desc{This unit contains the physics and plotting for the \ogui{opamomentum} GUI.
 }
 
-\uses{\ouni{linoplib}, \ogui{opatunediag}, \ouni{globlib}, \ouni{mathlib}, \oguif{../com/asfigure}, \ouni{../com/asaux}} 
+\uses{\ouni{linoplib}, \ogui{opatunediag}, \ouni{globlib}, \ouni{mathlib}, \oguif{comfigureframe}, \ouni{comauxlib}} 
 
 \pvar{
 The header contains parameters for the 20 plot modes: color of plot, number format for table, annotation of radio buttons in \ogui{opamomentum} etc. Some plots show two functions, for example horizontal and vertical tune shift. The arrays \unico{ires1,2} control, what to plot. \code{ires2=-1} suppresses the second curve.
@@ -1454,12 +1467,12 @@ The coefficients of momentum compaction may be taken over from a previous calcul
 For "playing" with the bucket, the viewer may also be used with manual input for cavity voltages and momentum compaction, even without any lattice. Therefore the option is always enabled in \ogui{opamenu}.
 }
 
-\uses{\ouni{globlib}, \ouni{mathlib}, \ouni{../com/conrect}, \oguif{../com/asfigure}, \ouni{../com/asaux}} 
+\uses{\ouni{globlib}, \ouni{mathlib}, \ouni{comcontourlib}, \oguif{comfigureframe}, \ouni{comauxlib}} 
 
 \act{
 \evcodx{On show}{FormShow} performs all initializations when the GUI becomes visible:  private procedure \guico{Layout} is called to arrange the components (although this GUI does not react to resize by user), user settings are loaded and filled into the edit fields. With this settings, the bucket is calculated immediately and shown by calling private \guico{CalcBucket} and \guico{MakePlot}:
 
-\guico{CalcBucket} performs all the calculations as described in \cite{inside}. This also includes the call to \prcod{../com/concrect}{conrec} to get the equipotential contours, because from these the energy acceptance and bunch length are estimated. However, this requires the central fixpoint to be elliptic (i.e. no overstretched bunches). And bunch length can be estimated only if there is a value for energy spread from a previous optics run.
+\guico{CalcBucket} performs all the calculations as described in \cite{inside}. This also includes the call to \prcod{comconcrect}{conrec} to get the equipotential contours, because from these the energy acceptance and bunch length are estimated. However, this requires the central fixpoint to be elliptic (i.e. no overstretched bunches). And bunch length can be estimated only if there is a value for energy spread from a previous optics run.
 
 \guico{MakePlot} just plots the results and writes them to labels in the GUI.
 
@@ -1505,7 +1518,7 @@ Besides frames for Hamiltonian modes and multipoles, the GUI contains several ed
 
 
 \uses{
-\oguif{chamframe}, \oguif{csexframe}, \ouni{chromreslib}, \ouni{chromelelib},  \ouni{chromlib}, \ogui{ochromsvector}, \ogui{opatunediag}, \ouni{globlib}, \ouni{mathlib}, \ouni{../com/asaux}
+\oguif{chamframe}, \oguif{csexframe}, \ouni{chromreslib}, \ouni{chromelelib},  \ouni{chromlib}, \ogui{ochromsvector}, \ogui{opatunediag}, \ouni{globlib}, \ouni{mathlib}, \ouni{comauxlib}
 }
 
 \ppro{
@@ -1569,7 +1582,7 @@ If there are octupoles in the lattice, controls for the SVD appear in the GUI. I
 \desc{At start, one instance of this frame is embedded in the GUI for each family of sextupole, octupole, decapole and combined function bend. It provides knobs to increase or decrease the magnet strength. Changing the value triggers a calculation of the Hamiltonian modes. If the minimizer is running, the strength field follows.}
 
 \uses{
-\ouni{chromreslib}, \ouni{chromelelib}, \ouni{chromlib}, \ogui{ochromsvector},  \ouni{globlib}, \ouni{../com/asaux}
+\ouni{chromreslib}, \ouni{chromelelib}, \ouni{chromlib}, \ogui{ochromsvector},  \ouni{globlib}, \ouni{comauxlib}
 }
 
 \ppro{
@@ -1609,7 +1622,7 @@ Private procedure \guifco{UpdateVal} sets the value and recalculates the drive t
 }
 
 \uses{
-\ouni{chromelelib},  \ouni{chromlib}, \ouni{globlib}, \ouni{../com/asaux}~-- and \oguif{csexframe} at runtime.
+\ouni{chromelelib},  \ouni{chromlib}, \ouni{globlib}, \ouni{comauxlib}~-- and \oguif{csexframe} at runtime.
 }
 
 \ppro{
@@ -1691,7 +1704,7 @@ The event handlers are trivial: The target and weight edit fields react to manua
 \desc{This little form contains only a plot window to show the sextupole kicks in the complex plane in order to visualize phase cancellations. All control is done by the \ofld{Select} button in the \ogui{opachroma} GUI.}
 
 \uses{
-\ouni{chromlib}, \ouni{globlib}, \ouni{mathlib}, \ouni{../com/asfigure}
+\ouni{chromlib}, \ouni{globlib}, \ouni{mathlib}, \ouni{comfigureframe}
 }
 
 \ppro{
@@ -1701,7 +1714,7 @@ The event handlers are trivial: The target and weight edit fields react to manua
 }
 
 \act{
-\evcodxf{on create}{FormCreate} and \evcodxf{on close}{FormClose} get and set the the user defined size of the window and save the setting on close.
+\evcodxf{on create}{FormCreate} and \evcodxf{on close}{FormClose} get and set the user defined size of the window and save the setting on close.
 }
 
 
@@ -1710,7 +1723,7 @@ The event handlers are trivial: The target and weight edit fields react to manua
 \desc{This unit is the base for all other units and GUIs of this section. It contains constants, type declarations and variables, and all the physics procedures.}
 
 \uses{
-\ouni{linoplib}, \ouni{elemlib}, \ogui{opatunediag}, \ouni{globlib}, \ouni{mathlib}, \ouni{../com/vgraph}, \ouni{../com/asaux}
+\ouni{linoplib}, \ouni{elemlib}, \ogui{opatunediag}, \ouni{globlib}, \ouni{mathlib}, \ouni{comvgraphlib}, \ouni{comauxlib}
 }
 
 
@@ -1776,23 +1789,14 @@ The \unico{Penalty} functions subtracts target values (for non-resonant modes), 
 }
 
 
- 
 
-
-
-
-
-
-
-
-
-\section{\label{secorin}Orbit and Injection}
+\section{\label{secorin}Orbit, Injection and Machine Layout}
 
 \oguih{Orbit and injection}{opaorbit} 
 
-\desc{Dpending on a flag set at start, this GUI is used for orbit or injection studies. 
+\desc{Depending on a flag set at start, this GUI is used for orbit or injection studies. 
 
-In orbit mode, correlated misalignments are applied, the response matrix is calculated and pseudo-inverted using an SVD procedure in order to correct the orbit. A loop function may run several error seeds to obtain some statistics. Note, that correctors and BPMs defined with reserved names \code{CH,CV,MON} in the lattice file are internally expanded to a set of individual elements, e.g. \code{CH001\dots} when unpacking the lattice by \prcod{globlib}{MakeLattice}.
+In orbit mode, correlated misalignments are applied, the response matrix is calculated and pseudo-inverted using an SVD procedure in order to correct the orbit. A loop function may run several error seeds to obtain some statistics. Note, that correctors and BPMs defined with reserved names \code{CH,CV,MON} in the lattice file are internally expanded to a set of individual elements, e.g. \code{CH001\dots} when unpacking the lattice by \prcod{editorlib}{MakeLattice}.
 
 In injection mode, kickers may be synchronized for correct timing, and the injected (and/or stored) beam trajectory is calculated for a few turns.
 
@@ -1802,15 +1806,15 @@ The GUI contains two plot windows for horizontal and vertical orbit and a line-u
 
 \ogui{ostartmenu} is called in both modes to set the initial conditions, where the periodic option is disabled in injection mode, because it makes no sense.
 
-\todo{\ogui{opaorbit} is similar to \ogui{opalinop} for linear optics design, because both show the orbit and provide clickable elements to be dragged to knobs. Furthermore, data are transferred from one to the other to calculate the optics on a corrected orbit. Thus it would make sense to combine both GUIs into one, perhaps using tabs for the different modes. However, \ogui{opaorbit} uses two \oguif{../com/asfigure} instances for plotting and the clickable elements are realized as \code{TShape} objects on the form, underneath the plot, whereas \ogui{opalinop} has its own, much more complex plot window with bars inside the plot for the elements.}
+\todo{\ogui{opaorbit} is similar to \ogui{opalinop} for linear optics design, because both show the orbit and provide clickable elements to be dragged to knobs. Furthermore, data are transferred from one to the other to calculate the optics on a corrected orbit. Thus it would make sense to combine both GUIs into one, perhaps using tabs for the different modes. However, \ogui{opaorbit} uses two \oguif{comfigureframe} instances for plotting and the clickable elements are realized as \code{TShape} objects on the form, underneath the plot, whereas \ogui{opalinop} has its own, much more complex plot window with bars inside the plot for the elements.}
 }
 
-\uses{
-\oguif{knobframe},  \ouni{linoplib}, \ogui{ostartmenu}, \ouni{globlib}, \ouni{mathlib}, \oguif{../com/asfigure}, \ouni{../com/asaux}
+\uses{\ouni{globlib}, \ouni{georblib},
+\oguif{knobframe},  \ouni{linoplib}, \ogui{ostartmenu}, \ouni{mathlib}, \oguif{comfigureframe}, \ouni{comauxlib}
 }
 
 \ppro{
-\guico{Start} receives a flag to set orbit or injection mode. Then the form passes a handle to itself to \ogui{linoplib} to enable a repaint. The girders are set up calling \prcod{globlib}{GirderSetup}. Then the lattice is searched for correctors, resp. kickers and monitors, arrays are declared to manage them, and symbols are created on the form. After restoring user settings and filling edit fields, \ogui{ostartmenu} is launched to get started.
+\guico{Start} receives a flag to set orbit or injection mode. Then the form passes a handle to itself to \ogui{linoplib} to enable a repaint. The girders are set up calling \prcod{georblib}{GirderSetup}. Then \prcod{georblib}{OrbitInit} is called to allocate arrays for BPMs and correctors, and symbols are created on the form. After restoring user settings and filling edit fields, \ogui{ostartmenu} is launched to get started.
 }
 
 \act{}
@@ -1819,7 +1823,7 @@ The GUI contains two plot windows for horizontal and vertical orbit and a line-u
 
 \todo{Some of these actions(marked by $\redast$) don't make sense in injection mode and should be hidden or disabled. The historical reason is, that the orbit mode was first and the injection mode was "squeezed" in later.}
 
-\evcodx{repaint}{FormPaint} plots the orbit. The procedure is called by \prcod{linoplib}{PlotOrbit} via the handle to the form passed at initialization. Orbit calculation and plotting is triggered by  \ogui{ostartmenu} and also by some components in the GUI. Plotting is done by private procedure \guico{Makeplot} which calls several other private procedures: \guico{Get (Orbit, Cor, Mis) Max} get the maxima of data for plot scaling, \guico{plot(X,Y)} plot the orbit, \guico{WeightPlot} shows a histogram of orbit correction SVD weighting factors, \guico{BPMshow} fills the BPM readout panel,  \guico{LabelShow} updates the correction status and \guico{CodStat} fills a panel with orbit statistics data. In injection mode some of these procedures do nothing.
+\evcodx{repaint}{FormPaint} plots the orbit. The procedure is called by \prcod{linoplib}{PlotOrbit} via the handle to the form passed at initialization. Orbit calculation and plotting is triggered by  \ogui{ostartmenu} and also by some components in the GUI. Plotting is done by private procedure \guico{Makeplot} which calls several other private procedures: \prcod{georblib}{Get(Orbit,Cor,Mis)Max} get the maxima of data for plot scaling, \guico{plot(X,Y)} plot the orbit, \guico{WeightPlot} shows a histogram of orbit correction SVD weighting factors, \guico{BPMshow} fills the BPM readout panel,  \guico{LabelShow} updates the correction status and \guico{CodStat} fills a panel with orbit statistics data. In injection mode some of these procedures do nothing.
 
 \evcodx{symbols}{BoxMouse(Down, Up)} drag an element shown as symbol (\code{TShape}) to either a knob (class \oguif{knobframe}) if it is an active element, i.e. corrector or kicker, or, if it is a BPM to the BPM panel \guico{panbpm} to show its readout.
 
@@ -1852,20 +1856,20 @@ $\redast$ \evcod{keep max.}{chkKeepMaxClick} freezes the maximum value for the p
 
 "Misalign and correct" panel \guico{panmis}:
 
-\evcod{set}{butMisalClick} reads misalignment data from the edit fields and calls private procedure \guico{SetMisalignments} to set correlated Gaussian distributed misalignment with the rms values from the edit fields and cut at a number of sigma also given there. First, the girders are set, then the secondary girders supported by other girders, then compound elements, i.e. series of lattice elements with no space between which are assumed to be one rigid body, and finally individual single elements. Finally the orbit is calculated and shown. The edit fields contain data for the girder ends, for the elements relative to the girder and for the joint play of a virtual link assumed to connect girders ("train link"). Misalignments are sway and heave, and for girders and elements also roll. The \ofld{El/Gird} field contains a percentage how to reduce the misalignment of elements on girder relative to single elements, assuming that they may be aligned better. The \ofld{seed} field takes any number to generate different random sees for testing.
+\evcod{set}{butMisalClick} reads misalignment data from the edit fields and calls  \prcod{georblib}{SetMisalignments} to set correlated misalignments for elements on girders. Then the orbit is calculated and shown. The edit fields contain data for the girder ends, for the elements relative to the girder and for the joint play of a virtual link assumed to connect girders ("train link"). Misalignments are sway and heave, and for girders and elements also roll. The \ofld{El/Gird} field contains a percentage how to reduce the misalignment of elements on girder relative to single elements, assuming that they may be aligned better. The \ofld{seed} field takes any number to generate different random sees for testing.
 
 \evcod{include BPM}{butMonabsClick} includes or excludes the BPMs from misalignments, i.e. if their readings are absolute or relative to their own misalignments, which is the realistic case. The caption of the button is changed to "exclude" if BPMs are absolute.
 
 \evcod{zero}{butZeroClick} and \evcod{re-set}{butSetAgainClick} sets all misalignments to zero or restores them again.
 
-\evcod{Correct}{butCorClick} performs the orbit correction: first (procs \guico{PrepOrbCorr}, \guico{GetResponseMatrix}), if not yet done, the arrays for the SVD are dimensioned, the response matrix is set up based on the analytical, linear lattice model, and the SV decomposition is done calling \prcod{mathlib}{SVDCMP}. \\
-Then (\guico{OrbitCorrection}) the orbit is corrected by passing the target vector of BPM references to \prcod{mathlib}{SVBKSB}. 
-The correction result is evaluated (\guico{CodStat}, \guico{CodStatCalc}) and the label \guico{LabOrbStat} is set to "zeroed" if all BPM read zero, to "minimized" if correction converged with some residual (this is the case if there are more BPMs than correctors), to "too many it." if correction did not converge within the limited number of iterations, and to "failed!" if it diverged and the orbit became too large. Statistics results are written to the table in the statistics panel \guico{panctr}, showing mean, rms and max value for BPM readings, orbit everywhere and corrector strengths.\\
+\evcod{Correct}{butCorClick} performs the orbit correction: if not yet done, the arrays for the SVD are dimensioned calling \guico{PrepOrbCorr} and the response matrix and the SVD are set up based on the analytical, linear lattice model by \prcod{georblib}{GetResponseMatrix}. Then \guico{OrbitCorrection} corrects the orbit calling \prcod{georblib}{oco\_step}.
+ 
+The correction result is evaluated calling \guico{CodStat} to check if the orbit as changed and \prcod{georblib}{CodStatCalc} to get statistical data. The label \guico{LabOrbStat} is set to "zeroed" if all BPM read zero, to "minimized" if correction converged with some residual (this is the case if there are more BPMs than correctors), to "too many it." if correction did not converge within the limited number of iterations, and to "failed!" if it diverged and the orbit became too large. Statistics results are written to the table in the statistics panel \guico{panctr}, showing mean, rms and max value for BPM readings, orbit everywhere and corrector strengths.\\
 Finally \guico{MakePlot} is called to show the corrected orbit, it contains the procedure \guico{WeightPlot} which plots a histogram of weight factors, showing in darker color weight factors which were set to zero (in case a more robust but incomplete correction is tried).
 
 \evcod{Loop}{butLoopClick} performs a series of orbit corrections to get statistical data. When pressing the button, at first the seed field changes to \ofld{Nseed} and the number inside is the number of seeds to do, and the button caption changes to \ofld{Run}.\\
-Pressing again starts the loop and the caption is set to \ofld{Break}. Pressing again while running aborts the loop, otherwise it continues to the end and the caption becomes \ofld{Done}. Pressing again sets the caption back to \ofld{Loop}. Internally this is controlled by variable \guico{loopstatus}. \\
-During running, the seed index is shown, and in the OPA log window in the main GUI \ogui{opamenu} the results of the seeds are listed. When done, the statistics data have a different meaning than for single orbit correction (\guico{LoopStatCalc}): "mean" is the mean rms orbit from all seeds, "rms" is the maximum of the rms values, and "max" is the absolute maximum.
+Pressing again starts the loop and the caption is set to \ofld{Break}. Pressing again while running aborts the loop, otherwise it continues to the end and the caption becomes \ofld{Done}. Pressing again sets the caption back to \ofld{Loop}. Internally this is controlled by variable \vrcod{georblib}{loopstatus}. \\
+During running, the seed index is shown, and in the OPA log window in the main GUI \ogui{opamenu} the results of the seeds are listed. When done, the statistics data as calculated by  \prcod{opageometry}{LoopStatCalc} have a different meaning than for single orbit correction: "mean" is the mean rms orbit from all seeds, "rms" is the maximum of the rms values, and "max" is the absolute maximum.
 
 \evcod{Corr=0}{butCorZeroClick} and \evcod{BPM=0}{butBPMZeroClick} set all correctors or all BPM references to zero.
 
@@ -1881,16 +1885,158 @@ During running, the seed index is shown, and in the OPA log window in the main G
 
 \evcod{ON}{butKickClick} activates the kickers, sets the caption of the button and enables the multi-turn buttons if the lattice is circular. Then the orbit is calculated and shown.
 
-\evcod{Sync}{butSyncClick} synchronizes the kicker by calculating the time of flight from the start of the lattice to the entry to the kicker and sets its field \unico{delay} to the same value. If the kicker is of finite length, \prcod{elemlib}{Kicker} takes care of internal time of flight.
+\evcod{Sync}{butSyncClick} synchronizes the kickers calling \prcod{georblib}{SyncKickers} .
 
 \evcod{$-$,$+$}{butKickT(m,p)Click} increase the number of turns (max 3) to be calculated and plotted in a circular lattice. \prcod{linoplib}{OrbitCalc} is called with a negative number used as a switch to count turns and start at begin of lattice in successive turns.
+
+\oguih{Machine Layout}{opageometry}
+
+\desc{
+The layout of the lattice in physical space is shown, by default as seen from top. The geometry as defined by the design orbit is calculated in 3D-space from elements lengths, deflection and rotation angles. Depending on initial conditions, the orbit curve in space is rotated and translated. The elements are made from faces, i.e. polygons in 3D-space, which become polygons in 2D-space when projected to the image plane.
+
+Several files can be exported, among them a \code{.geo} file of polygons, which can also be read again in order to show several lattice structures in one plot (e.g. ring with transfer lines).
+
+Geometric matching is used to exactly close a ring or to adjust the final position and angle of a transfer line. For that purpose the lattice should contain variables with names starting with the letter ``G'', which control lengths and deflection or rotation angles of elements. Then an SVD optimizer is used to adjust the final (or initial) coordinates and angles of the lattice structure to given target values.
+
+The GUI contains plot window \guico{geo} to show the machine layout, panel \guico{PanParam} with a table to define how elements are shown in the plot, panel \guico{PanGeo} for initial and final position data and panel \guico{PanMat} to control geometric matching.
+
+\todo{Unfortunately this unit is still incomplete and buggy, nevertheless it is quite useful. Following measures need to be adressed for improvement and completion:
+\begin{itemize}
+\item Mouse actions to zoom to a region of interest work well in the Windows version but not in the Linux version. Reasons are not yet understood, probably related to different event handling.
+%\item Geometric matching works but is not well implemented yet. More checks are required. Also an ``undo'' button should be added.
+\item Up to now the elements are ``flat'', i.e. represented by a face of some length and width in the midplane. When changing initial conditions from top to side view, they look ugly. It would be straightforward to define bodies composed from top and side faces, however this would also require some rendering algorithm for 3D-display which may be beyond the scope of OPA~-- instead, the data export to CAD programs may be used.
+\end{itemize}
+}
+}
+
+\uses{\ouni{globlib}, \ouni{varlib}, \ouni{georblib}, \ouni{linoplib}, \ouni{mathlib}, \oguif{comfigureframe}, \ouni{comauxlib}}
+
+\ppro{
+\guico{Start} at first passes a handle to the GUI to the embedded \oguif{comfigureframe} frame \guico{geo} in order to later react to mouse events in the plot window. Then it calls \prcod{georblib}{GeoInit} to read settings, to set up the girders and to create dynamically all required GUI components. Variables for geometric matching are allocated and corresponding components are created. Then a first geometric plot is generated calling procedures \prcod{georblib}{CalcOrbit,CalcFaces,TransPoly,GeoMinMax}. Finally
+\guico{MakePlot} plots the 2D-polygons and additional data to the screen. 
+}
+
+
+\act{}
+\evcodx{arrow buttons}{but(Left,Right,Up,Down,SForward,SBackward,ZoomFull)Click} select the view by shifting, by following the lattice or by returning to full view. Further marking a rectangle with the mouse selects a region of interest (see \oguif{comfigureframe}, \todo{BUG: does not work in the linux version}).
+
+\evcodx{geo.p repaint}{geopPaint}: an \code{OnPaint} for the paintbox object \guifco{p} inside \guifco{geo} calls \guico{MakePlot} to update the plot. \todo{Probably the malfunction in the linux version is related to that~-- to be explored.}
+
+\evcod{show Orbit}{chkOrbitClick} overplots the orbit.
+
+\evcod{fix aspect ratio}{chkAspratClick} fixes the aspect ratio to have same scales horizontal and vertical (true by default).
+
+\evcodx{parameter table}{GridParamKeyPressed} reads data how to show the various lattice elements from the paramter grid at left and updates the plot.
+
+\evcod{$\longrightarrow$Data}{butListClick} calls \prcod{georblib}{WriteGEoFiles} to export text files with geometry data.
+
+\evcod{$\longleftarrow$Data}{butListClick} opens a dialog to select geomery files and calls \prcod{georblib}{ReadGeoFiles} to read and add the data to the current plot. This is useful to overplot various lattices, for example booster, transfer line and storage ring.
+
+\evcod{Mode (cen,ini,fin)}{rbdrawClick} enables/disables the edit fields at left for initial and final position depending on the mode of calculation, which is from start or end of latice, or centering provided there are markers with reserved name \code{CENTER} in the lattice.\\[1ex]
+
+If geometric matching is possible, i.e. the panel \guico{PanMat} is visible listing simple variables with names starting with the latter~``G'', then check boxes for geometric matching are enabled to select target values and knobs, and following actions become available:
+
+\evcod{check boxes}{chkg\_Click, chkgvar\_Click} select target fields and knobs (i.e. variables) and enable the matching button \ofld{match} if there are at least as many kobs as targets.
+
+\evcod{actual}{butGoalClick} switches the button caption to \ofld{target} and highlights the checked edit fields for positions and angles to enter target values. Pressing the button again switches back to the actual values.
+
+\evcod{match}{butMatClick} performs the SVD for geometric matching calling \prcod{georblib}{gmat\_ini,gmat\_step}. 
+
+\evcod{reset}{butResetClick} restores initial values calling \prcod{georblib}{gmat\_reset}  if the user doesn't like the solution.
+
+\evcod{Exit}{butExClick} saves the user settings and closes the GUI.
+
+
+
+
+
+\ounih{Orbit, injection and geometry calculations}{georblib}
+
+\desc{This unit contains the calculations for \ogui{opaorbit} and \ogui{opageometry}. It defines the girders, which are used for correlated misalignment or for showing the machine layout. Two SVD procedures are included, one for orbit correction using orbit correctors and BPMs, the other one for geometric matching using variables with names starting with letter "G" and manual target input.}
+
+\uses{\ouni{globlib}, \ouni{linoplib}, \ouni{elemlib}, \ouni{mathlib}, \ouni{comauxlib}}
+
+\pvar{}
+
+Many constants define properties of the parent GUIs like label strings, number formats, etc. 
+
+\unico{Girder} is an array of \unico{GirderType} records. It contains position and orientation of the girder, the misalignments of its feet, the index in the lattice array where it starts and ends, and an information how it is connected to the adjacent girders. 
+
+For orbit correction, types \unico{cortype} and \unico{bpmtype} define correctors and BPMs as used here, i.e. with properties copied from/to the global \unico{Ella}-array. \unico{OrbLoopType} saves results from many orbit corrections. For injection, type \unico{kicktype} defines pulsed elements. For machine layoyut, types \unico{midpt}, \\unico{faceType} and \unico{fpolytype} define orbit coordinates, 3D-faces of elements and 2D-polygons for plotting. Array variables of corresponding types are named same without suffix "Type".
+
+Arrays named \unico{oco\dots} are used for the orbit correction SVD, which is rather complex including filtering of weight factors and individual target values for BPMs. The geometry SVD is far more simple and contained inside procedure \unico{gmat\_step}.
+
+
+\ppro{}
+
+\underline{Procedures for all modes}
+
+\unico{GirderSetup} evaluates the girder structure if contained in the lattice and allocates the lattice elements to the corresponding girders.
+
+\underline{Procedures for orbit and injection}
+
+\unico{OrbitInit} searches the lattice for correctors, resp. kickers and monitors and declares the \unico{cor}, \unico{bpm} and \unico{kick} arrays to manage them. Then it restores user settings and sets initial parameters.
+
+\unico{OrbitExit} is called on regular exit from \ogui{opaorbit}. It sets the status label of \ogui{opamenu} to indicate whether correctors are active or not and saves the user settings.
+
+\unico{OrbitClose} is called when closing the \ogui{opaorbit} form and releases dynamic arrays which had been allocated for orbit correction.
+
+
+\unico{GetOrbitMax}, \unico{GetCorMax} and \unico{GetMisMax} simply get the min/max values for orbit data, corrector strength and misalignment data to set plot range.
+
+\unico{setMisalignments} applies Gaussian distributed misalignment with the rms values as entered in the edit fields of the \ogui{opaorbit} form and cut at a number of sigma also given there. First, the girders are set, then the secondary girders supported by other girders, then compound elements, i.e. series of lattice elements with no space between which are assumed to be one rigid body, and finally individual single elements.
+
+\unico{GetResponseMatrix} calculates the analytical response matrix for the ideal lattice in periodic or single pass mode. Then the SV decomposition is performed calling \prcod{mathlib}{SVDCMP}.
+
+\unico{CodstatCalc} calculates mean, rms and max values for orbit, correctors and misalignments.
+
+\unico{LoopstatCalc} evaluates a number of orbit corrections. It classifies the corrections (zeroed, minimized, failed etc.) and calculates the mean rms value from all successful corrections, the maximum rms value and the absolute maximum for orbit, correctors and misalignments.  
+
+\unico{oco\_init} just sets up the right and side vector of the linear system for SVD.
+
+\unico{oco\_step} performs an iteration of the correction by passing the target vector of BPM readings and references to the vector and calling \prcod{mathlib}{SVBKSB}.
+
+\unico{oco\_term} releases temporary arrays.
+
+\unico{SyncKickers} is called in injection mode to synchronize the kickers with the beam: It calculates the time of beam arrival at the kicker entry and adjusts its field \unico{delay} to the same value. If the kicker is of finite length, \prcod{elemlib}{Kicker} takes care of internal time of flight.
+
+\underline{Procedures for machine layout}
+
+\unico{GeoInit} reads user settings, initializes the variables for geometry calculations and sets up the girders calling \unico{GirderSetup}.
+
+\unico{GeoExit} saves user settings and is called on regular exit from \ogui{opageometry}.
+
+\unico{GeoClose} releases dynamic arrays and is called when closing \ogui{opageometry}.
+
+\unico{CalcOrbit} calculates the orbit in 3D-space, i.e. the location and orientation of all elements starting from a zero position and direction. These data are saved in array \unico{midpt}, and later variations of initial conditions don't require re-calculations but only transformations. 
+ 
+\unico{CalcFaces} calculates the faces of a body in 3D-space representing a lattice element. Data include the array \unico{vpt} of corner points and the array \unico{face} listing the face properties and where to start and end reading points from the corner point array. \todo{As mentioned, presently only one face in the element midplane is used, extension to front and side faces would be straigtforward.}
+
+\unico{CalcPoly} calculates 2D-polygons (arrays \unico{ptx,pty}) for plotting from the faces in 3D-space using the current imaging options like observer location and direction of view \todo{(incomplete)}.
+
+\unico{TransRot} and \unico{TransPoly} transform (translate and rotate) the orbit only or all faces including recalculation of polygons.
+                 
+\unico{geoMinMax}  calculates the plot ranges.
+
+\unico{WriteGeoFiles} exports file \code{*\_geo.txt} of polygon data. \todo{Further files of geometry data named \code{*\_(holy,srad,mpo,pos).txt} are exported too, however these have only historical or SLS-specific meanings and may be adapted as needed.}
+
+\unico{ReadGeoFiles} imports files of polygon data \code{*\_geo.txt} to add them to the current plot. 
+
+\unico{gsetedgval} stores values of initial paramters, positions and angles.
+
+\unico{gmat\_ini} sets up arrays for geometric matching through SVD.
+
+\unico{gmat\_step} executes the SVD procedure for geometric matching. It calculates a sensitivity matrix how the target values react on the knobs, starts an SVD-procedure calling \prcod{mathlib}{svdcmp,svbksb} and updates the plot. 
+If the fit fails, variables are reset, otherwise they are updated. 
+
+\unico{gmat\_reset} resets variables to initial values.
 
 
 \section{\label{sectrac}Tracking}
 There are three GUIs for phase space tracking, dynamic aperture and Touschek lifetime, and a physics unit used by all three. 
 
 \oguih{Phase space}{opatrackps} 
-\uses{\ouni{tracklib}, \ouni{globlib}, \ogui{opatunediag}, \ouni{mathlib}, \oguif{../com/asfigure}, \ouni{../com/vgraph}, \ouni{../com/asaux}}
+\uses{\ouni{tracklib}, \ouni{globlib}, \ogui{opatunediag}, \ouni{mathlib}, \oguif{comfigureframe}, \ouni{comvgraphlib}, \ouni{comauxlib}}
 
 \desc{
 The GUI for phase space tracking contains four plot windows for the transverse phase spaces (\guico{psx}, \guico{psy}) and for the particle spectra (\guico{ftx}, \guico{fty}), and six panels to set parameters or show results. Single particles are started from coordinates entered manually in edit fields or passed from mouse clicks in the phase space plots.  Amplitude dependent tune shifts (ADTS) are obtained by stepping up particle coordinates. For simulation of injection, a beam ellipse populated with many particles can be tracked. 
@@ -1898,7 +2044,7 @@ The GUI for phase space tracking contains four plot windows for the transverse p
 The six panels are \guico{PanParam} to set tunes and apertures, \guico{PanCtrl} to set start coordinates, \guico{PanRes} to show a table of tunes found in the spectra, \guico{PanFFT} to set parameters of the Fast Fourier Transform (FFT), \guico{PanTush} to set parameters for the ADTS loop and \guico{PanBeam} to set parameters for the beam ellipse. From the last four only two are visible at a time.}
 
 \ppro{
-\guico{Start} receives a handle to the tune diagram \ogui{opatunediag}. The combobox \guico{comTurns} is populated with powers of 2 for the available number of turns. User settings are restored. The four \oguif{../com/asfigure} instances for plotting are assigned and handles are passed to the edit fields for starting coordinates in order to later read coordinates from clicking into the plot. Flags and fields are initialized. Finally, \prcod{tracklib}{Initdpp} is called, which provides the periodic solution (it will exist, otherwise the tracking option would not be enabled in \ogui{opamenu}) and the physical aperture limitations projected to the track point. The \ofldx{onPaint} event of the plot areas will then show empty beam ellipses corresponding to the linear physical limit. \todo{BUG: at start the plot sometimes appears too small, ok after touching (resizing) the GUI.}
+\guico{Start} receives a handle to the tune diagram \ogui{opatunediag}. The combobox \guico{comTurns} is populated with powers of 2 for the available number of turns. User settings are restored. The four \oguif{comfigureframe} instances for plotting are assigned and handles are passed to the edit fields for starting coordinates in order to later read coordinates from clicking into the plot. Flags and fields are initialized. Finally, \prcod{tracklib}{Initdpp} is called, which provides the periodic solution (it will exist, otherwise the tracking option would not be enabled in \ogui{opamenu}) and the physical aperture limitations projected to the track point. The \ofldx{onPaint} event of the plot areas will then show empty beam ellipses corresponding to the linear physical limit. \todo{BUG: at start the plot sometimes appears too small, ok after touching (resizing) the GUI.}
 }
 
 \act{}
@@ -1922,7 +2068,7 @@ Note: a common event handler \guico{ediAction} is used for most edit fields in t
 
 \evcod{dp/p[\%]}{ediAction[edidpp]} calls \prcod{tracklib}{Initdpp} again for the momentum offset as entered. The periodic solution may be lost, if the value is too large, then a warning pops up. 
 
-\evcod{Run}{butRunClick} reads the coordinates from the four edit fields \ofld{X[mm]} etc. These values may have been entered manually or by a \guifco{pMouseDown} event in the \guico{psx,psy} plot areas (see \oguif{../com/asfigure} above). Before starting tracking, the particle amplitude is calculated using the local beta functions, and an ellipse is drawn for comparison with the aperture limitation. Then the function \guico{Track} is called to track the given number of turns by calling 
+\evcod{Run}{butRunClick} reads the coordinates from the four edit fields \ofld{X[mm]} etc. These values may have been entered manually or by a \guifco{pMouseDown} event in the \guico{psx,psy} plot areas (see \oguif{comfigureframe} above). Before starting tracking, the particle amplitude is calculated using the local beta functions, and an ellipse is drawn for comparison with the aperture limitation. Then the function \guico{Track} is called to track the given number of turns by calling 
 \prcod{tracklib}{Oneturn} in a loop, and to plot the coordinates during tracking. When finished it will return \code{false}, when the particle was lost it will return \code{true}. If succesfull, private procedure \guico{Spectrum} is called, which applies a sine-window to the data for peak interpolation before calling \prcod{tracklib}{TWOFFT} and \unico{FFTtoAmp} to get horizontal and vertical particle spectra as real amplitudes. Then private \guico{FFTplot} is called: it plots the spectra, tries to guess the resonances corresponding to the peaks found by calling \prcod{tracklib}{FindPeaks} and \unico{ResoGuess}, and shows the results in the spectrum plots and in the table \guico{resgrid} in panel \guico{PanRes}. The tune indentified as fundamental is plotted in the tune diagram \ogui{opatunediag}.
 
 \evcod{More}{butMoreClick} continues tracking with the same number of turns and updates the spectra with the new points.
@@ -1935,7 +2081,7 @@ Note: a common event handler \guico{ediAction} is used for most edit fields in t
 
 \underline{Panel \guico{PanTush}}
 
-\evcod{Run}{butTushClick} starts an ADTS scan by stepping up particle amplitude and tracking the tune. At first the number of steps is taken from the \ofld{Nsteps} field, and the \ofld{Break} button is enabled to abort the scan. Then three arrays for tunes and amplitudes are declared, for horizontal, vertical and coupled motion. Maximum amplitudes are given by element apertures or by manually entered apertures (see above) and calculated by \prcod{tracklib}{AmpKappa} assuming elliptical apertures \cite{inside}.  If manually entered apertures are used, the acceptance from element apertures are alsos shown in the plot. Since FFT does not distinguish between below and above half integer, following the tune has to take into account on which side the tune is located.
+\evcod{Run}{butTushClick} starts an ADTS scan by stepping up particle amplitude and tracking the tune. At first the number of steps is taken from the \ofld{Nsteps} field, and the \ofld{Break} button is enabled to abort the scan. Then three arrays for tunes and amplitudes are declared, for horizontal, vertical and coupled motion. Maximum amplitudes are given by element apertures or by manually entered apertures (see above) and calculated by \prcod{tracklib}{AmpKappa} assuming elliptical apertures \cite{inside}.  If manually entered apertures are used, the acceptance from element apertures are also shown in the plot. Since FFT does not distinguish between below and above half integer, following the tune has to take into account on which side the tune is located.
 
 During tracking label \guico{labtprog} is updated to inform about the progress, the start coordinates are shown in the edit fields of panel \guico{PanCtrl} and the Poincare\'e\ plot of the particle motion is shown in the \guico{psx,psy} plot areas. When the number of turns is completed and the particle was not lost, then the spectra are calculated and plotted, and identification of the fundamental tune is tried. \todo{The lines in the code following the call of \unico{Spectrum} are an attempt to still follow the particle tune if it moves over half integer. It sometimes works but often doesn't~-- to be improved.} The found tunes are plotted in the tune diagram calling \grcod{opatunediag}{AddTushPoint}. If manually entered apertures are used, particles outside the acceptance from element apertures are plotted in grey color in the tune diagram.
 
@@ -1953,7 +2099,7 @@ When the scan is done, the tune as function of amplitudes is plotted for the thr
 
 \evcod{Set}{ButBeamShowClick} reads the edit fields for beta and alpha function and emittance and the number of particles and creates the particle ensemble centered at the initial coordinates as given in the \guico{PanCtrl} panel. Note, that the ensemble is generated only in one dimension, while the coordinates in the other dimension are the same for all particles. The start ensemble is plotted in green.
 
-\evcod{Run}{ButBeamRunClick} reads the \ofld{show turns} field, which tells the first $N$ turns to be plotted (useful for injection studies). The last turn is plotted anyway. The function \guico{TrackBeam} performs tracking. It tracks all particles of the ensemble for one turn after the other, counts how many are left, and plots the ensemble if plotting this turn was requested. And it writes the the number of turns done and the number of surviving particles to label \guico{LabT} in panel \guico{PanParam}. If there are surviving paricles, the button caption is set to \ofld{More} and pressing it again will continue tracking.
+\evcod{Run}{ButBeamRunClick} reads the \ofld{show turns} field, which tells the first $N$ turns to be plotted (useful for injection studies). The last turn is plotted anyway. The function \guico{TrackBeam} performs tracking. It tracks all particles of the ensemble for one turn after the other, counts how many are left, and plots the ensemble if plotting this turn was requested. And it writes the number of turns done and the number of surviving particles to label \guico{LabT} in panel \guico{PanParam}. If there are surviving paricles, the button caption is set to \ofld{More} and pressing it again will continue tracking.
 
 \evcod{Break}{ButBeamBreak} aborts tracking by setting flag \guico{BeamBreak} which is checked in the \guico{TrackBeam} loop.\\[1ex]
 
@@ -1962,9 +2108,6 @@ When the scan is done, the tune as function of amplitudes is plotted for the thr
 \evcod{Resonance Guess -- Parameters}{butParamClick} switches visibility from panel \guico{PanRes} to \guico{PanFFT} and fills the edit fields. Panel \guico{PanRes} is passive, it contains only a table listing found peaks and resonance guesses, and panel \guico{PanFFT} contains edit fields to set parameters for peak and resonance identification. Label and button captions change to \ofld{FFT parameters -- Update}. Pressing the button again switches back to panel \guico{PanRes}, updates the filter, repeats the FFT plot and evaluation, and sets back label and button captions.
 
 \evcodx{resize}{FormResize} calls \guico{ResizeAll} to dynamically resize the complete GUI and initialize the plot areas again.
-
-
-
 
 
 \oguih{Dynamic aperture}{opatrackda} 
@@ -1977,7 +2120,7 @@ The FF 3-d scan provides data for "Fast Touschek Tracking" in \ogui{opatracktt}.
 The GUI contains a plot window \guico{fig}, two radio button groups \guico{rgmode} and \guico{rgmeth} to set mode and method, two panels \guico{PanNray} and \guico{pangrid} to set parameters for BS and GP/FF modes, and edit fiels for turns and momentum offset.
 }
 
-\uses{\ouni{tracklib}, \ouni{globlib} \ouni{mathlib}, \oguif{../com/asfigure}, \ouni{../com/vgraph}, \ouni{../com/asaux}}
+\uses{\ouni{tracklib}, \ouni{globlib} \ouni{mathlib}, \oguif{comfigureframe}, \ouni{comvgraphlib}, \ouni{comauxlib}}
 
 
 \ppro{
@@ -2042,7 +2185,7 @@ Lifetime, or actually the MA, can be calculated in two modes: In both modes a bi
 Gas lifetime is calculated too, Coulomb lifetime (elastic scattering) from the effective acceptance, \todo{however this includes only the physical, not the dynamic aperture limits.} Bremsstrahlung (inelastic scattering) uses the negative MA as used for Touschek lifetime anyway.
 } 
 
-\uses{\ouni{tracklib}, \ouni{linoplib}, \ouni{globlib} \ouni{mathlib}, \oguif{../com/asfigure}, \ouni{../com/vgraph}, \ouni{../com/asaux}}
+\uses{\ouni{tracklib}, \ouni{linoplib}, \ouni{globlib} \ouni{mathlib}, \oguif{comfigureframe}, \ouni{comvgraphlib}, \ouni{comauxlib}}
 
 \ppro{
 \guico{Start} sets plot window \guico{flofig} to visible and reduces the size of the main plot \guico{fig} correspondingly, if there are data for the 3-d acceptance (flag \unico{status.FloPoly}). Then it reads user settings and fills the input fields with these values. 
@@ -2050,7 +2193,7 @@ All labels and edit fields are created dynamically and thus not visible in the I
 
 Periodic solution is calculated. It has to exist, otherwise launching the GUI would be blocked in \ogui{opamenu}). An array of data for plotting apertures is established. \ouni{tracklib} is told to use element apertures for tracking, and the MA is set to include RF-MA by default (can be changed by checkbox \guico{chkRFL}). 
 
-Procedure \guico{Output} is called to set up to do a complete calcu;ation of linear lifetime, i.e. lifetime based on apertures and linear beam dynamics. It calls procedure \guico{CalcBeta}, which performs following steps: 1.~it defines plot parameters. 2.~It calls \guico{InitSigma} to create typed array \guico{tsig} to keep all position dependent data like beta function, MA, loss rate etc. Beta functions are already known and written into this array. 3.~It calls \guico{CalcMAlin} to calculate the linear physical lattice MA from the apertures and the local $\cal H$-function~\cite{inside}. 4.~It calls \guico{CalcAccEL} to calculate the relevant acceptances for elastic scattering lifetime~\cite{inside}.
+Procedure \guico{Output} is called to set up to do a complete calculation of linear lifetime, i.e. lifetime based on apertures and linear beam dynamics. It calls procedure \guico{CalcBeta}, which performs following steps: 1.~it defines plot parameters. 2.~It calls \guico{InitSigma} to create typed array \guico{tsig} to keep all position dependent data like beta function, MA, loss rate etc. Beta functions are already known and written into this array. 3.~It calls \guico{CalcMAlin} to calculate the linear physical lattice MA from the apertures and the local $\cal H$-function~\cite{inside}. 4.~It calls \guico{CalcAccEL} to calculate the relevant acceptances for elastic scattering lifetime~\cite{inside}.
 
 After these initialization, \guico{Output} calculates the derived values: it first converts the input values to SI-units. If the lattice contains coupling, emittances are taken over from the periodic solution, if not, they are calculated from the input value for coupling. If coupling is zero, it is set to 0.1\%\ and a warning message pops up. If RF-MA and bunchlength were calculated by \ogui{opabucket}, the values are taken over, if not, they are calculated from the input values for voltage and harmonic number. In both cases the synchtron tune is calculated in linear approximation from the main voltage only. Then the bunch volume is calculated from betas, emittance and bunch length (\guico{CalcSigma}). Linear Touschek lifetime is calculated from the minimum of the linear MA (as given by the apertures) and the RF-MA (\guico{CalcLifetime}), if the check box \ofld{RF limit} is checked, otherwise RF-MA is ignored. Gas lifetime and total lifetime are calculated as described above. Finally the derived values are written to the output fields after conversion from SI to convenient units.
 }
@@ -2096,7 +2239,7 @@ Array \unico{geodpp} of \unico{geodpp\_type} keeps optics parameters of the mome
 
 Variables named \unico{FloP\dots} keep parameters of the 3-d acceptance calculated by \ouni{opatrackda} and used by \ouni{opatracktt}.
 
-Othre variables, mostly of elementary type, keep temporary data and control flags.
+Other variables, mostly of elementary type, keep temporary data and control flags.
 }
 
 \ppro{}
@@ -2138,66 +2281,8 @@ The procedures in the last third of the unit are for signal processing, to calcu
 
 
 
-\section{\label{secelse}Machine layout and magnet currents}
+\section{\label{secelse}Magnet currents}
 
-\oguih{Machine Layout}{opageometry}
-
-\desc{
-The layout of the lattice in physical space is shown, by default as seen from top. The geometry as defined by the design orbit is calculated in 3D-space from elements lengths, deflection and rotation angles. Depending on initial conditions, the orbit curve in space is rotated and translated. The elements are made from faces, i.e. polygons in 3D-space, which become polygons in 2D-space when projected to the image plane.
-
-Several files can be exported, among them a \code{.geo} file of polygons, which can also be read again in order to show several lattice structures in one plot (e.g. ring with transfer lines).
-
-Geometric matching is used to exactly close a ring or to adjust the final position and angle of a transfer line. For that purpose the lattice should contain variables with names starting with the letter ``G'', which control lengths and deflection or rotation angles of elements. Then an SVD optimizer is used to adjust the final (or initial) coordinates and angles of the lattice structure to given target values.
-
-The GUI contains plot window \guico{geo} to show the machine layout, panel \guico{PanParam} with a table to define how elements are shown in the plot, panel \guico{PanGeo} for initial and final position data and panel \guico{PanMat} to control geometric matching.
-
-\todo{Unfortunately this unit is still incomplete and buggy, nevertheless it is quite useful. Following measures need to be adressed for improvement and completion:
-\begin{itemize}
-\item Mouse actions to zoom to a region of interest work well in the Windows version but not in the Linux version. Reasons are not yet understood, probably related to different event handling.
-\item Geometric matching works but is not well implemented yet. More checks are required. Also an ``undo'' button should be added.
-\item Up to now the elements are ``flat'', i.e. represented by a face of some length and width in the midplane. When changing initial conditions from top to side view, they look ugly. It would be straightforward to define bodies composed from top and side faces, however this would also require some rendering algorithm for 3D-display which may be beyond the scope of OPA~-- instead, the data export to CAD programs may be used.
-\item All calculations are presently done in the GUI, which is bad practice. Calculations should be extracted and moved to a new unit \code{geolib}.
-\end{itemize}
-}
-}
-
-\uses{\ouni{globlib}, \ouni{linoplib}, \ouni{mathlib}, \ouni{../com/asaux}}
-
-\ppro{
-\guico{Start} at first passes a handle to the GUI to the embedded \oguif{../com/asfigure} frame \guico{geo} in order to later react to mouse events in the plot window. Then it reads defaults and creates dynamically all required GUI components. Variables for geometric matching are allocated and corresponding components are created. Then \prcod{globlib}{GirderSetup} is called to calculate girder parameters. Then a first geometric plot is generated calling this sequence of private procedures: \\
-\guico{CalcOrbit} calculates the orbit in 3D-space, i.e. the location and orientation of all elements starting from a zero position and direction. These data are saved in array \guico{midpt}, and later variations of initial conditions don't require re-calculations but only transformations. \\
-\guico{CalcFaces} calculates the faces of a body in 3D-space representing a lattice element. Data include the array \guico{vpt} of corner points and the array \guico{face} listing the face properties and where to start and end reading points from the corner point array. \todo{As mentioned, presently only one face in the element midplane is used, extension to front and side faces would be straigtforward.}\\
-\guico{CalcPoly} calculates 2D-polygons (arrays \guico{ptx,pty}) for plotting from the faces in 3D-space using the current imaging options like observer location and direction of view \todo{(incomplete)}.\\
-\guico{MakePlot} finally plots the 2D-polygons and additional data to the screen. Before, the plot range is set based on the current zoom options.
-}
-
-
-\act{}
-\evcodx{arrow buttons}{but(Left,Right,Up,Down,SForward,SBackward,ZoomFull)Click} select the view by shifting, by following the lattice or by returning to full view. Further marking a rectangle with the mouse selects a region of interest (see \oguif{../com/asfigure}, \todo{BUG: does not work in the linux version}).
-
-\evcodx{geo.p repaint}{geopPaint}: an \code{OnPaint} for the paintbox object \guifco{p} inside \guifco{geo} calls \guico{MakePlot} to update the plot. \todo{Probably the malfunction in the linux version is related to that~-- to be explored.}
-
-\evcod{show Orbit}{chkOrbitClick} overplots the orbit.
-
-\evcod{fix aspect ratio}{chkAspratClick} fixes the aspect ratio to have same scales horizontal and vertical (true by default).
-
-\evcodx{parameter table}{GridParamKeyPressed} reads data how to show the various lattice elements from the paramter grid at left and updates the plot.
-
-\evcod{$\longrightarrow$Data}{butListClick} exports several text files with geometry data. Most important is \code{\_geo.txt} containing the polygons of the plot. The other files \code{\_(pos,mpo,holy,srad).txt} export element positions and parameters in various formats for postprocessing by other codes. \todo{These are of historical or SLS-specific origin and may be adapted as needed.}
-
-\evcod{$\longleftarrow$Data}{butListClick} opens a dialog to select polygon files (\code{$\ast$\_geo.txt}) and add the polygons to the plot. This is useful to overplot various lattices, for example booster, transfer line and storage ring.
-
-\evcod{Mode (cen,ini,fin)}{rbdrawClick} enables/disables the edit fields at left for initial and final position depending on the mode of calculation, which is from start or end of latice, or centering provided there are markers with reserved name \code{CENTER} in the lattice.\\[1ex]
-
-If geometric matching is possible, i.e. the panel \guico{PanMat} is visible listing simple variables with names starting with the latter~``G'', then check boxes for geometric matching are enabled to select target values and knobs, and following actions become available:
-
-\evcod{check boxes}{chkg\_Click, chkgvar\_Click} select target fields and knobs (i.e. variables) and enable the matching button \ofld{match} if there are at least as many kobs as targets.
-
-\evcod{actual}{butGoalClick} switches the button caption to \ofld{target} and highlights the checked edit fields for positions and angles to enter target values. Pressing the button again switches back to the actual values.
-
-\evcod{match}{butMatClick} performs the geometric matching: it calculates a sensitivity matrix how the target values react on the knobs, starts an SVD-procedure calling \prcod{mathlib}{svdcmp,svbksb} and updates the plot. If the fit fails, values are reset, otherwise they are updated. \todo{An ``undo'' button should be added to be able to reject the solution}.\\[1ex]
-
-\evcod{Exit}{butExClick} saves the user settings and closes the GUI.
 
 
 \oguih{Magnet currents}{opacurrents}
@@ -2207,7 +2292,7 @@ If geometric matching is possible, i.e. the panel \guico{PanMat} is visible list
 Data are exported to an EPICS  \code{.snap} file which is rather SLS-specific, however features like current calculation may be of general interest. In order to do so, additional files for magnet allocations, listing the magnet types of lattice elements, and for calibration, listing the coefficients of the characteristic hysteresis curve, have to be provided (see unit \ouni{latfilelib}). Coefficients are explained in the comments section of procedure \guico{getKfromI}. Example files for SLS are provided with this document as \code{sls\_currents.zip}. 
 }
 
-\uses{\ouni{globlib}, \ouni{mathlib}, \ouni{../com/asaux}}
+\uses{\ouni{globlib}, \ouni{mathlib}, \ouni{comauxlib}}
 
 \ppro{
 \guico{Start} already performs all current calculations: The used elements in the \unico{Ella} should have an entry in the namelist field (see page \pageref{namelist}) telling about the magnet type. Using the corresponding calibration, procedures  \guico{getIfromK} and \guico{getdIdKfac} calculate the current and the attenuation factor at this current, i.e. the relative reduction of the hysteresis slope. This is performed by a root finder iterating on the reverse function \guico{getKfromI}. Polarity is also taken into account. Power supplies are then listed with number of connected magnets and current in the left table \guico{cgrid}. 
